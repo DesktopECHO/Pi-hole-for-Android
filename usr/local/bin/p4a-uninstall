@@ -1,0 +1,7 @@
+#!/bin/bash
+clear
+[ -f /usr/local/bin/pihole ] && pihole uninstall
+echo
+echo 'In Linux Deploy press [ STOP  ] after Pi-hole uninstaller completes'
+echo "           Then press [ START ] and run p4a-install for a new Pi-hole install"
+echo 

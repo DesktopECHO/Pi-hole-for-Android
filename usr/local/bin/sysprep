@@ -1,0 +1,19 @@
+#!/bin/bash
+service xrdp stop
+service lighttpd stop
+service pihole-FTL stop
+service syslog-ng stop
+pkill xrdp
+pkill xrdp-sesman
+rm /etc/pihole/pihole-FTL.db 
+rm -rf /etc/dropbear/* 
+rm -rf /home/android/.bash_history 
+rm -rf /root/.bash_history
+rm -rf /var/log/*.log
+rm -rf /var/log/lighttpd/*.log
+rm -rf /var/log/messages /var/log/secure
+rm -rf /etc/xrdp/*.pem /etc/xrdp/rsakeys.ini
+cd /home/android ; rm -rf .cache .pcsc* .ssh .vnc .rnd .pki .local .Xauthority .xsession* PADD.pid piHoleVersion thinclient_drives /tmp/* /tmp/.*
+clear
+echo Turn off this instance and run image backup.
+sleep 60

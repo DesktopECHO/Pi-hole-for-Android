@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# Clean up before start
+rm -rf /sbin/service /var/lock/subsys/* /tmp/* /var/run/*.pid ; cp /.service /sbin/service
+
+# Make sure users are in right groups
+usermod -a -G aid_net_bt_admin,aid_net_bt,aid_inet,aid_net_raw,aid_net_admin root
+usermod -a -G aid_net_bt_admin,aid_net_bt,aid_inet,aid_net_raw,aid_net_admin pihole
+usermod -a -G aid_net_bt_admin,aid_net_bt,aid_inet,aid_net_raw,aid_net_admin lighttpd
+
+# IP / subnet / interface detection
+ipaddr=$(ip route list table main) ; ipaddr=`echo $ipaddr | awk -F' ' ' { print $(NF-0) } '`
+subnetmask=$(ip route list table main) ; subnetmask=$(cut -d "/" -f2 <<< "$subnetmask") ; subnetmask=$(cut -d " " -f1 <<< "$subnetmask") ; echo $subnetmask
+device=$(ip route list table main | cut -d' ' -f 3)
+touch /etc/sysconfig/network-scripts/ifcfg-$device
+
+#  When a Pi-hole instance is started, the default setting is to let
+#  it automagically configure networking.  When you change netwokrks
+#  on the Android device stop the Linux Deploy instance and re-start it.
+#
+#  Alternatively, set a static assignment by commentng-out
+#  the next 2 lines.  This lets you manually add your IP, subnet
+#  and interface name to /etc/pihole/setupVars.conf
+sed -i "/IPV4_ADDRESS/c\IPV4_ADDRESS=$ipaddr/$subnetmask" /etc/pihole/setupVars.conf
+sed -i "/PIHOLE_INTERFACE/c\PIHOLE_INTERFACE=$device"     /etc/pihole/setupVars.conf
+
+# Start Services
+service syslog-ng start
+service dropbear start
+service xrdp start
+service lighttpd start
+service pihole-FTL start
+touch /var/lock/subsys/local

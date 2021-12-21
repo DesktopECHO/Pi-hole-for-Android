@@ -5,7 +5,7 @@
 # chkconfig: 2345 66 33
 #
 lockfile=/var/lock/subsys/syslog-ng
-pidfile=/var/run/syslog-ng.pid
+pidfile=/var/lib/syslog-ng/syslog-ng.pid
 binary=/sbin/syslog-ng
 [ -r /etc/rc.d/init.d/functions ] && . /etc/rc.d/init.d/functions
 [ -r /etc/sysconfig/syslog-ng ] && . /etc/sysconfig/syslog-ng
@@ -74,3 +74,4 @@ status)
     usage
     ;;
 esac
+

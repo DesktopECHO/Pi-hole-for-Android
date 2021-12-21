@@ -1,7 +1,8 @@
+# vim /etc/rc.d/init.d/crond
 #!/bin/bash
 #
 # description: crond daemon
-# chkconfig: 2345 10 99
+# chkconfig: 2345 10 90
 #
 lockfile=/var/lock/subsys/crond
 pidfile=/var/run/crond.pid
@@ -36,7 +37,7 @@ stop() {
         exit 1
     fi
         echo -n "Stopping crond daemon: "
-        pkill crond
+        pkill -HUP crond
         RETVAL=$?
         echo
                                                                                                                                                                                                                                                                                                                                                                                                                                                                 

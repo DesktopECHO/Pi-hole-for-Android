@@ -1,12 +1,14 @@
 #!/bin/bash
 
 # Clean up before start
-rm -rf /sbin/service /var/lock/subsys/* /tmp/* /var/run/*.pid ; cp /.service /sbin/service
+[ ! -f /sbin/unbound ] && rpm -Uvh /rpm/*.rpm && cp /.pihole.conf /etc/unbound/conf.d/pihole.conf
+rm -rf /sbin/service /var/lock/subsys/* /tmp/* /var/run/*.pid ; cp /.service /sbin/service ; cp /.service /bin/update-rc.d ; rm -f /bin/pihole ; ln -s /usr/local/bin/pihole /bin/pihole
 
 # Make sure users are in right groups
 usermod -a -G aid_net_bt_admin,aid_net_bt,aid_inet,aid_net_raw,aid_net_admin root
 usermod -a -G aid_net_bt_admin,aid_net_bt,aid_inet,aid_net_raw,aid_net_admin pihole
 usermod -a -G aid_net_bt_admin,aid_net_bt,aid_inet,aid_net_raw,aid_net_admin lighttpd
+usermod -a -G aid_net_bt_admin,aid_net_bt,aid_inet,aid_net_raw,aid_net_admin unbound
 
 # IP / subnet / interface detection
 ipaddr=$(ip route list table main) ; ipaddr=`echo $ipaddr | awk -F' ' ' { print $(NF-0) } '`
@@ -25,9 +27,13 @@ sed -i "/IPV4_ADDRESS/c\IPV4_ADDRESS=$ipaddr/$subnetmask" /etc/pihole/setupVars.
 sed -i "/PIHOLE_INTERFACE/c\PIHOLE_INTERFACE=$device"     /etc/pihole/setupVars.conf
 
 # Start Services
-service syslog-ng start
-service dropbear start
-service xrdp start
-service lighttpd start
+service syslog-ng  start
+service crond      start
+service dropbear   start
+service xrdp       start
+service lighttpd   start
+service unbound    start
 service pihole-FTL start
+
+# This needs to be at the end of rc.local
 touch /var/lock/subsys/local

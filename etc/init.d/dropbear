@@ -73,7 +73,7 @@ stop() {
         exit 1
     fi
         echo -n "Stopping dropbear daemon: "
-        killproc dropbear
+        pkill -HUP dropbear
         RETVAL=$?
         echo
                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
@@ -116,3 +116,4 @@ genrsakey)
     usage
     ;;
 esac
+

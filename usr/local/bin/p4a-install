@@ -1,11 +1,14 @@
 #!/bin/bash
 touch /etc/lighttpd/external.conf
 service lighttpd start
-mkdir -p /etc/pihole ; cp /.setupVars /etc/pihole/setupVars.conf 
+mkdir -p /etc/pihole ; cp /.setupVars /etc/pihole/setupVars.conf
 subnetmask=$(ip route list table main) ; subnetmask=$(cut -d "/" -f2 <<< "$subnetmask") ; subnetmask=$(cut -d " " -f1 <<< "$subnetmask")
 device=$(ip route list table main | cut -d' ' -f 3)
 ipaddr=$(ip route list table main) ; ipaddr=`echo $ipaddr | awk -F' ' ' { print $(NF-0) } '`
 sed -i "/IPV4_ADDRESS/c\IPV4_ADDRESS=$ipaddr/$subnetmask" /etc/pihole/setupVars.conf
 sed -i "/PIHOLE_INTERFACE/c\PIHOLE_INTERFACE=$device"     /etc/pihole/setupVars.conf
 curl -L https://install.pi-hole.net | bash /dev/stdin --unattended
-echo 
+echo
+echo 'In Linux Deploy press [ STOP  ] after Pi-hole install is complete'
+echo '           Then press [ START ] to launch Pi-hole'
+echo

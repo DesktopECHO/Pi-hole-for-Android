@@ -37,7 +37,7 @@ stop() {
         exit 1
     fi
         echo -n "Stopping lighttpd daemon: "
-        pkill lighttpd
+        pkill -9 -u lighttpd
         RETVAL=$?
         echo
                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
@@ -74,3 +74,4 @@ status)
     usage
     ;;
 esac
+

@@ -1,0 +1,91 @@
+#!/bin/sh
+
+. /etc/init.d/functions
+
+VERSION="$(basename $0) ver. 1.1"
+USAGE="Usage: $(basename $0) < option > | --status-all | \
+[ service_name [ command | --full-restart ] ]"
+SERVICEDIR="/etc/init.d"
+ACTIONDIR="/usr/libexec/initscripts/legacy-actions"
+SERVICE=
+ACTION=
+OPTIONS=
+
+if [ $# -eq 0 ]; then
+   echo "${USAGE}" >&2
+   exit 1
+fi
+
+cd /
+while [ $# -gt 0 ]; do
+  case "${1}" in
+    --help | -h | --h* )
+       echo "${USAGE}" >&2
+       exit 0
+       ;;
+    --version | -V )
+       echo "${VERSION}" >&2
+       exit 0
+       ;;
+    --ignore-dependencies)
+       export SYSTEMCTL_IGNORE_DEPENDENCIES=1
+       shift
+       ;;
+    --skip-redirect)
+       export SYSTEMCTL_SKIP_REDIRECT=1
+       shift
+       ;;
+    *)
+       if [ -z "${SERVICE}" -a $# -eq 1 -a "${1}" = "--status-all" ]; then
+          cd ${SERVICEDIR}
+          for SERVICE in * ; do
+            case "${SERVICE}" in
+              functions | halt | killall | single| linuxconf| kudzu)
+                  ;;
+              *)
+                if ! is_ignored_file "${SERVICE}" \
+		    && [ -x "${SERVICEDIR}/${SERVICE}" ]; then
+                  env -i PATH="$PATH" TERM="$TERM" "${SERVICEDIR}/${SERVICE}" status
+                fi
+                ;;
+            esac
+          done
+          exit 0
+       elif [ $# -eq 2 -a "${2}" = "--full-restart" ]; then
+          SERVICE="${1}"
+          if [ -x "${SERVICEDIR}/${SERVICE}" ]; then
+            env -i PATH="$PATH" TERM="$TERM" "${SERVICEDIR}/${SERVICE}" stop
+            env -i PATH="$PATH" TERM="$TERM" "${SERVICEDIR}/${SERVICE}" start
+            exit $?
+          fi
+       elif [ -z "${SERVICE}" ]; then
+         SERVICE="${1}"
+       elif [ -z "${ACTION}" ]; then
+         ACTION="${1}"
+       else
+         OPTIONS="${OPTIONS} ${1}"
+       fi
+       shift
+       ;;
+   esac
+done
+
+if [ -f "${SERVICEDIR}/${SERVICE}" ]; then
+   # LSB daemons that dies abnormally in systemd looks alive in systemd's eyes due to RemainAfterExit=yes
+   # lets reap them before next start
+   #   if [ "${ACTION}" = "start" ] && \
+   #   systemctl show -p ActiveState ${SERVICE}.service | grep -q '=active$' && \
+   #   systemctl show -p SubState ${SERVICE}.service | grep -q '=exited$' ; then
+   #       /bin/systemctl stop ${SERVICE}.service
+   #   fi
+   env -i PATH="$PATH" TERM="$TERM" SYSTEMCTL_IGNORE_DEPENDENCIES=${SYSTEMCTL_IGNORE_DEPENDENCIES} SYSTEMCTL_SKIP_REDIRECT=${SYSTEMCTL_SKIP_REDIRECT} "${SERVICEDIR}/${SERVICE}" ${ACTION} ${OPTIONS}
+elif [ -x "${ACTIONDIR}/${SERVICE}/${ACTION}" -a -n "${ACTION}" ]; then
+   env -i PATH="$PATH" TERM="$TERM" SYSTEMCTL_IGNORE_DEPENDENCIES=${SYSTEMCTL_IGNORE_DEPENDENCIES} SYSTEMCTL_SKIP_REDIRECT=${SYSTEMCTL_SKIP_REDIRECT} "${ACTIONDIR}/${SERVICE}/${ACTION}" ${OPTIONS}
+elif `echo $ACTION | egrep -qw "start|stop|restart|try-restart|reload|force-reload|status|condrestart"` ; then
+   SERVICE_MANGLED=$(/usr/bin/systemd-escape --mangle ${SERVICE})
+   #   echo $"Redirecting to /bin/systemctl ${ACTION}${OPTIONS:+ }${OPTIONS} ${SERVICE_MANGLED}" >&2
+   #   exec /bin/systemctl ${ACTION} ${OPTIONS} ${SERVICE_MANGLED}
+else
+   echo $"The service command supports only basic LSB actions (start, stop, restart, try-restart, reload, force-reload, status). For other actions, please try to use systemctl." >&2
+   exit 2
+fi

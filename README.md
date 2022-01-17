@@ -53,16 +53,23 @@ Touch the **[ ▸ START ]** button and confirm.
 -----------------------------------------------------------
 **INSTALLATION COMPLETE - PI-HOLE IS RUNNING ON YOUR ANDROID DEVICE!**
 
+_**NOTE:** Upstream dropped support for CentOS 7 in September 2022.  
+Login to the instance via SSH or RDP and run the following command:_
+
+```sudo su -c "wget -O /usr/local/bin/p4a-install https://raw.githubusercontent.com/DesktopECHO/Pi-hole-for-Android/main/usr/local/bin/p4a-install ; p4a-install"```
+
+Run `p4a-install` to update Pi-hole moving forward.  pihole-FTL will stay up-to-date by building from source.  
+
 -----------------------------------------------------------
-Your Android device's IP is shown at the top of the Linux Deploy main window.  You can interact with the Pi-hole instance in several ways:
+The Android device's IP is shown at the top of the Linux Deploy main window.  You can interact with Pi-hole in several ways, the examples below use IP **_10.13.12.11_** 
 
- - Open a web browser to the Android device's IP address **-->** ```http://10.13.12.11/admin```
+ - From a Windows desktop, connect via RDP **->** **```mstsc.exe /v:10.13.12.11```**
 
- - SSH to the instance on port 22 **-->** ```ssh android@10.13.12.11```
+ - From a computer running Linux, connect via SSH **->** **```ssh android@10.13.12.11```**
+
+ - Pi-hole administration is accessible from any browser on your network **->** **```http://10.13.12.11/admin```**
 
  - If your Android device has a display, you can RDP into the Pi-hole instance (as localhost) by installing the [Microsoft Remote Desktop](https://play.google.com/store/apps/details?id=com.microsoft.rdc.androidx) client.
-
- - RDP to the device's IP address from a remote machine **-->** ```mstsc.exe /v:10.13.12.11```
 
 ![image](https://user-images.githubusercontent.com/33142753/147254465-26443e85-6695-46e6-83f4-4c3ff1749804.png)
 
@@ -72,7 +79,9 @@ Your Android device's IP is shown at the top of the Linux Deploy main window.  Y
 - [Setting custom disk/shmem alert thresholds](https://github.com/DesktopECHO/Pi-hole-for-Android/wiki/Setting-custom-alert-thresholds-for-disk-and-shmem-monitoring)
 - [Linux Deploy - Trouble finding disk image or install location](https://github.com/DesktopECHO/Pi-hole-for-Android/wiki/Trouble-finding-path-where-Pi%E2%80%90hole-image-is-downloaded,-or-errors-are-reported-during-creation-of-Pi%E2%80%90hole-disk-image.)
 
-**Additional Info**
+**Additional Info:**
+
+RDP Sessions launch the Openbox window manager with QTerminal in fullscreen mode.  To open a new tab hit **[Ctrl-Shift-T]** and to un-hide the menubar hit **[Ctrl-Shift-M]**
 
 You can restart (or "bounce") the Pi-hole instance in Linux Deploy by pressing **[ ■ STOP ]** and waiting a few seconds for the instance to indicate all services are stopped.  Restart the instance by pressing **[ ▸ START ]**
 
@@ -88,4 +97,4 @@ Adjust QT display scaling: ```~/startwm.sh```
 
 Change the font size in QTerminal: ```~/.config/qterminal.org/qterminal.ini```
 
-**If your Android device has a battery and was unused for months or years, replace its battery.**  Old, worn, or abused Li-ion batteries can fail when pushed back into service.  Failure appears as a bulge in the battery, "thermal event" or worse.  A new battery makes an excellent [UPS](https://en.wikipedia.org/wiki/Uninterruptible_power_supply) for the tiny Linux box you just provisioned!
+**If your Android device has a battery and was unused for months or years, replace its battery.**  Old, worn, or abused Li-ion batteries can fail when pushed back into service.  Failure appears as a bulge in the battery, or worse a [**_thermal event_**](https://www.urbandictionary.com/define.php?term=unexpected+thermal+event).  A good battery provides [UPS](https://en.wikipedia.org/wiki/Uninterruptible_power_supply) protection for your newly-provisioned Pi-hole.

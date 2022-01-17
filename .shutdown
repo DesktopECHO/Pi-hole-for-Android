@@ -1,0 +1,8 @@
+#!/bin/bash
+service pihole-FTL stop
+service unbound    stop
+service lighttpd   stop
+service xrdp    stop
+service crond      stop
+service syslog-ng  stop
+unchroot am start -a com.android.internal.intent.action.REQUEST_SHUTDOWN

@@ -1,8 +1,11 @@
 #!/bin/bash
 
-# Clean up before start
+# Clean-up environment for startup, update PADD, install unbound for new deployment
+curl --silent --output /bin/padd https://raw.githubusercontent.com/pi-hole/PADD/master/padd.sh
+rm -rf /sbin/service /var/lock/subsys/* /tmp/* /var/run/*.pid /sbin/shutdown /sbin/reboot /bin/pihole
+/bin/cp /.service /sbin/service ; /bin/cp /.shutdown /sbin/shutdown ; /bin/cp /.reboot /sbin/reboot; /bin/cp /.service /bin/update-rc.d ; ln -s /usr/local/bin/pihole /bin/pihole ; /bin/cp /.systemctl /usr/bin/systemctl
+chmod +x /usr/bin/systemctl /sbin/shutdown /sbin/reboot /bin/padd
 [ ! -f /sbin/unbound ] && rpm -Uvh /rpm/*.rpm && cp /.pihole.conf /etc/unbound/conf.d/pihole.conf
-rm -rf /sbin/service /var/lock/subsys/* /tmp/* /var/run/*.pid ; cp /.service /sbin/service ; cp /.service /bin/update-rc.d ; rm -f /bin/pihole ; ln -s /usr/local/bin/pihole /bin/pihole
 
 # Make sure users are in right groups
 usermod -a -G aid_net_bt_admin,aid_net_bt,aid_inet,aid_net_raw,aid_net_admin root
@@ -11,10 +14,14 @@ usermod -a -G aid_net_bt_admin,aid_net_bt,aid_inet,aid_net_raw,aid_net_admin lig
 usermod -a -G aid_net_bt_admin,aid_net_bt,aid_inet,aid_net_raw,aid_net_admin unbound
 
 # IP / subnet / interface detection
-ipaddr=$(ip route list table main) ; ipaddr=`echo $ipaddr | awk -F' ' ' { print $(NF-0) } '`
-subnetmask=$(ip route list table main) ; subnetmask=$(cut -d "/" -f2 <<< "$subnetmask") ; subnetmask=$(cut -d " " -f1 <<< "$subnetmask") ; echo $subnetmask
-device=$(ip route list table main | cut -d' ' -f 3)
+subnetmask=$(ip route list table main | tail -n1) ; subnetmask=$(cut -d "/" -f2 <<< "$subnetmask") ; subnetmask=$(cut -d " " -f1 <<< "$subnetmask")
+device=$(ip route list table main | tail -n1 | cut -d' ' -f 3)
+ipaddr=$(ip route list table main | tail -n1) ; ipaddr=`echo $ipaddr | awk -F' ' ' { print $(NF-0) } '`
 touch /etc/sysconfig/network-scripts/ifcfg-$device
+
+# Derive hostname from device name (or set to your preference)
+hostname=$(unchroot getprop ro.product.device) # or hostname="DroidHole"
+hstnm=$(echo $hostname | sed -e 's/ /-/g' |  sed -e 's/_/-/g'| sed -e 's/--//g') ; echo $hstnm > /proc/sys/kernel/hostname ; echo $hstnm > /etc/hostname ; sed -i "/$ipaddr/d" "/etc/hosts" ; sed -i "/$hstnm/d" "/etc/hosts" ; echo $ipaddr $hstnm $hstnm.local >> /etc/hosts
 
 #  When a Pi-hole instance is started, the default setting is to let
 #  it automagically configure networking.  When you change netwokrks

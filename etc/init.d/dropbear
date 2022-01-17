@@ -1,4 +1,3 @@
-# vim /etc/rc.d/init.d/dropbear
 #!/bin/bash
 #
 # description: dropbear ssh daemon
@@ -116,4 +115,3 @@ genrsakey)
     usage
     ;;
 esac
-

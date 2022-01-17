@@ -1,0 +1,8 @@
+#!/bin/bash
+service pihole-FTL stop
+service unbound    stop
+service lighttpd   stop
+service xrdp       stop
+service crond      stop
+service syslog-ng  stop
+bash -c "unchroot am start -a android.intent.action.REBOOT" > /dev/null 2>&1

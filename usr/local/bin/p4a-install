@@ -1,14 +1,31 @@
 #!/bin/bash
+[[ ! -f /opt/rh/devtoolset-9/root/usr/bin/gcc ]] && yum -y install https://buildlogs.centos.org/c7-devtoolset-9.armhfp/devtoolset-9-binutils/20211015132728/2.32-16.el7.2.armhfp/devtoolset-9-binutils-2.32-16.el7.2.armv7hl.rpm https://buildlogs.centos.org/c7-devtoolset-9.armhfp/devtoolset-9-gcc/20211014113237/9.3.1-2.2.el7.armhfp/devtoolset-9-gcc-9.3.1-2.2.el7.armv7hl.rpm https://buildlogs.centos.org/c7-devtoolset-9.armhfp/devtoolset-9-gcc/20211014113237/9.3.1-2.2.el7.armhfp/devtoolset-9-gcc-c++-9.3.1-2.2.el7.armv7hl.rpm https://buildlogs.centos.org/c7-devtoolset-9.armhfp/devtoolset-9-gcc/20211014113237/9.3.1-2.2.el7.armhfp/devtoolset-9-libstdc++-devel-9.3.1-2.2.el7.armv7hl.rpm https://buildlogs.centos.org/c7-devtoolset-9.armhfp/devtoolset-9/20211013151212/9.1-1.el7.armhfp/devtoolset-9-runtime-9.1-1.el7.armv7hl.rpm scl-utils policycoreutils-python python3-pip python-IPy nettle-devel libidn-devel readline-devel cmake3
 touch /etc/lighttpd/external.conf
-service lighttpd start
-mkdir -p /etc/pihole ; cp /.setupVars /etc/pihole/setupVars.conf
-subnetmask=$(ip route list table main) ; subnetmask=$(cut -d "/" -f2 <<< "$subnetmask") ; subnetmask=$(cut -d " " -f1 <<< "$subnetmask")
-device=$(ip route list table main | cut -d' ' -f 3)
-ipaddr=$(ip route list table main) ; ipaddr=`echo $ipaddr | awk -F' ' ' { print $(NF-0) } '`
+mkdir -p /etc/pihole ; /bin/cp -f /.setupVars /etc/pihole/setupVars.conf
+echo v5.16.3 > /etc/pihole/ftlbranch ; export PIHOLE_SKIP_OS_CHECK=true
+subnetmask=$(ip route list table main | tail -n1) ; subnetmask=$(cut -d "/" -f2 <<< "$subnetmask") ; subnetmask=$(cut -d " " -f1 <<< "$subnetmask")
+device=$(ip route list table main | tail -n1 | cut -d' ' -f 3)
+ipaddr=$(ip route list table main | tail -n1) ; ipaddr=`echo $ipaddr | awk -F' ' ' { print $(NF-0) } '`
+clear ; echo Pi-hole for Android // Device: $device // IP: $ipaddr // SubNet: $subnetmask ; echo
 sed -i "/IPV4_ADDRESS/c\IPV4_ADDRESS=$ipaddr/$subnetmask" /etc/pihole/setupVars.conf
 sed -i "/PIHOLE_INTERFACE/c\PIHOLE_INTERFACE=$device"     /etc/pihole/setupVars.conf
 curl -L https://install.pi-hole.net | bash /dev/stdin --unattended
-echo
-echo 'In Linux Deploy press [ STOP  ] after Pi-hole install is complete'
-echo '           Then press [ START ] to launch Pi-hole'
-echo
+python -c "print('\033[A\033[A\033[A\033[A')"
+cd /tmp
+rm -rf FTL ; git clone --depth=1 https://github.com/pi-hole/FTL.git
+cd FTL
+
+# Fixups
+sed -i 's/cmake/cmake3/g' build.sh
+sed -i '/BUS_MCEERR_AR/d' src/signals.c
+sed -i '/BUS_MCEERR_AO/d' src/signals.c
+sed -i 's/--dirty//g'     src/gen_version.cmake
+
+# Build pihole-FTL with updated CentOS 7 toolchain
+echo ; echo "Building pihole-FTL from source.  This will take a few minutes..."
+scl enable devtoolset-9 ./build.sh >/etc/pihole/install.log 2>&1
+
+# Install and Restart pihole-FTL
+mkdir -p /var/log/pihole ; chown -R pihole:pihole /var/log/pihole
+bash -c "service pihole-FTL stop ; pkill pihole-FTL ; /bin/cp pihole-FTL /usr/bin/pihole-FTL ; service pihole-FTL start ; service lighttpd restart ; pihole-FTL -v > /etc/pihole/ftlbranch" >>/etc/pihole/install.log 2>&1
+echo ; pihole -v ; pihole status ; echo

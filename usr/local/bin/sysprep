@@ -12,13 +12,16 @@ rm -rf /root/.bash_history
 rm -rf /var/log/*.log
 rm -rf /var/tmp/*
 rm -rf /var/log/pihole/*
+rm -rf /var/log/*.gz
 rm -rf /var/log/cron
+rm -rf /var/log/kern
+rm -rf /var/log/systemctl.log
 rm -rf /var/log/lighttpd/*.log
 rm -rf /var/log/messages /var/log/secure
 rm -rf /etc/xrdp/*.pem /etc/xrdp/rsakeys.ini
 rm -rf /var/cache/yum/armhfp/7/*
 cd /home/android ; rm -rf .cache .pcsc* .ssh .vnc .rnd .pki .local .Xauthority .xsession* PADD.pid piHoleVersion thinclient_drives /tmp/* /tmp/.*
-rpm -e unbound ; rpm -e unbound-libs ; rm -rf /etc/unbound ; rm -rf /var/lib/unbound /var/lib/unbound/root.key.rpmsave
+rpm -e unbound ; rpm -e unbound-libs ; rm -rf /etc/unbound ; rm -rf /var/lib/unbound
 clear
 echo Turn off this instance and run image backup.
 sleep 60

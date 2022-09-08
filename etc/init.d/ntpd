@@ -1,0 +1,154 @@
+#!/bin/bash
+#
+# ntpd          This shell script takes care of starting and stopping
+#               ntpd (NTPv4 daemon).
+#
+# chkconfig: - 58 74
+# description: ntpd is the NTPv4 daemon. \
+# The Network Time Protocol (NTP) is used to synchronize the time of \
+# a computer client or server to another server or reference time syntaxhighlight, \
+# such as a radio or satellite receiver or modem.
+
+# Source function library.
+. /etc/init.d/functions
+
+if [ -f /etc/sysconfig/ntpd ];then
+        . /etc/sysconfig/ntpd
+fi
+
+ntpconf=/etc/ntp.conf
+ntpstep=/etc/ntp/step-tickers
+
+RETVAL=0
+prog="ntpd"
+
+sync_hwclock() {
+        ARC=0
+        SRM=0
+        UTC=0
+
+        if [ -f /etc/sysconfig/clock ]; then
+           . /etc/sysconfig/clock
+
+           # convert old style clock config to new values
+           if [ "${CLOCKMODE}" = "GMT" ]; then
+              UTC=true
+           elif [ "${CLOCKMODE}" = "ARC" ]; then
+              ARC=true
+           fi
+        fi
+
+        CLOCKFLAGS="$CLOCKFLAGS --systohc"
+
+        case "$UTC" in
+            yes|true)   CLOCKFLAGS="$CLOCKFLAGS --utc";;
+            no|false)   CLOCKFLAGS="$CLOCKFLAGS --localtime";;
+        esac
+        case "$ARC" in
+            yes|true)   CLOCKFLAGS="$CLOCKFLAGS --arc";;
+        esac
+        case "$SRM" in
+            yes|true)   CLOCKFLAGS="$CLOCKFLAGS --srm";;
+        esac
+
+        action $"Syncing hardware clock to system time" /sbin/hwclock $CLOCKFLAGS
+}
+
+readconf() {
+        dostep=''
+        dropstr=''
+        OPTIND=1
+        while getopts ":46aAbc:dD:f:gi:k:l:LnN:p:P:qr:s:t:u:v:V:x" args $OPTIONS;
+        do
+          case "$args" in
+            x) dostep=yes;;
+            c) ntpconf="$OPTARG";;
+            u) dropstr="-U $(echo $OPTARG | sed 's/:.*//')";;
+          esac
+        done
+
+        [ -x /sbin/ntpd -a -f $ntpconf ] || exit 0
+
+        tickers=''
+        if [ -s "$ntpstep" ]; then
+            tickers=$(sed 's/#.*//' $ntpstep)
+            echo "$tickers" | grep -qi '[a-z0-9]' && dostep=yes || tickers=''
+        fi
+        if [ -n "$dostep" -a -z "$tickers" ]; then
+            # -x option is used, but step-tickers doesn't exist or contain
+            # anything useful, use servers from ntp.conf instead
+            tickers=$(awk '$1=="peer"||$1=="server"{print $2}' $ntpconf | \
+                fgrep -v 127.127.1.0)
+        fi
+}
+
+start() {
+        # Check that networking is up.
+        [ "$NETWORKING" = "no" ] && exit 1
+
+        readconf;
+
+        if [ -n "$dostep" ]; then
+            echo -n $"$prog: Synchronizing with time server: "
+            /sbin/ntpdate $dropstr -s -b $NTPDATE_OPTIONS $tickers &>/dev/null
+            RETVAL=$?
+            [ $RETVAL -eq 0 ] && success || failure
+            echo
+            if [ $RETVAL -eq 0 ]; then
+                [ "$SYNC_HWCLOCK" = "yes" ] && sync_hwclock
+            else
+                OPTIONS="$OPTIONS -g"
+            fi
+        else
+            # -g can replace the grep for time servers
+            # as it permits ntpd to violate its 1000s limit once.
+            OPTIONS="$OPTIONS -g"
+        fi
+        # Start daemons.
+        echo -n $"Starting $prog: "
+        daemon ntpd $OPTIONS
+        RETVAL=$?
+        echo
+        [ $RETVAL -eq 0 ] && touch /var/lock/subsys/ntpd
+        return $RETVAL
+}
+
+stop() {
+        echo -n $"Shutting down $prog: "
+        killproc ntpd
+        RETVAL=$?
+        echo
+        [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/ntpd
+        return $RETVAL
+}
+
+# See how we were called.
+case "$1" in
+  start)
+        start
+        ;;
+  stop)
+        stop
+        ;;
+  status)
+        status ntpd
+        RETVAL=$?
+        ;;
+  restart|reload)
+        stop
+        start
+        RETVAL=$?
+        ;;
+  condrestart)
+        if [ -f /var/lock/subsys/ntpd ]; then
+            stop
+            start
+            RETVAL=$?
+        fi
+        ;;
+  *)
+        echo $"Usage: $0 {start|stop|restart|condrestart|status}"
+        RETVAL=3
+esac
+
+exit $RETVAL

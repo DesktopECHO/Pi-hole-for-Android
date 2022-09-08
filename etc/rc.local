@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # Clean-up environment for startup, update PADD, install unbound for new deployment
+ntpd -gq
 curl --silent --output /bin/padd https://raw.githubusercontent.com/pi-hole/PADD/master/padd.sh
 rm -rf /sbin/service /var/lock/subsys/* /tmp/* /var/run/*.pid /sbin/poweroff /sbin/reboot /bin/pihole
 /bin/cp /.service /sbin/service ; /bin/cp /.poweroff /sbin/poweroff ; /bin/cp /.reboot /sbin/reboot; /bin/cp /.service /bin/update-rc.d ; ln -s /usr/local/bin/pihole /bin/pihole ; /bin/cp /.systemctl /usr/bin/systemctl ; /bin/cp /.motd /etc/motd
@@ -34,13 +35,22 @@ sed -i "/IPV4_ADDRESS/c\IPV4_ADDRESS=$ipaddr/$subnetmask" /etc/pihole/setupVars.
 sed -i "/PIHOLE_INTERFACE/c\PIHOLE_INTERFACE=$device"     /etc/pihole/setupVars.conf
 
 # Start Services
+yes ' ' | sed 40q
+echo '_______________________________________'
+echo '                                       '
+echo '        Pi-hole for Android            '
+echo ' '
 service syslog-ng  start
 service crond      start
 service dropbear   start
 service xrdp       start
 service lighttpd   start
 service unbound    start
-service pihole-FTL start
+
+# Quietly start FTL and get better reporting from pihole status
+service pihole-FTL start > /var/log/pihole.log 2>&1
+pihole status
+echo '_______________________________________'
 
 # This needs to be at the end of rc.local
 touch /var/lock/subsys/local

@@ -22,17 +22,26 @@ Pi-hole for Android is a CentOS disk image for [Linux Deploy](https://play.googl
   - Android 4.x requires an older release: **https://github.com/meefik/linuxdeploy/releases/tag/2.5.1**
 
 -  Download the latest Pi-hole for Android disk image: 
-   - **[Release v1.6 - September 8, 2022](https://github.com/DesktopECHO/Pi-hole-for-Android/releases/download/v1.6/p4a16.tgz)**
+   - **[Release v1.7 - Octover 5, 2022](https://github.com/DesktopECHO/Pi-hole-for-Android/releases/download/v1.6/p4a16.tgz)**
 
 - Open **Linux Deploy** and change ONLY these settings:
-     -  Open Properties Menu (Bottom Right)
-     -  Distribution: **rootfs.tar**
-     -  Source Path - This varies depending on the device, ie: **${EXTERNAL_STORAGE}/Download/p4a16.tgz**
-     -  Image size (MB): **4000** (Recommmended, for smaller devices minimum is 2000 MB)
-     -  Set password for user **android**
-     -  Init -> **Enable**
- - Go back to main window, click **Options** Menu (Three dots, usually at top right of screen) and click **Install**
-     -  Wait a few minutes for the image to install before proceeding to the next step.  When install is complete, the Linux Deploy console window will show the following at the end of the console output: 
+     -  Open the 'Hamburger menu' (Symbol with three dashes at top left of screen) then touch **Settings**.  Place a checkmark on these options:
+        -  **Lock Screen** (If you want to keep display always on)
+        -  **Lock Wi-Fi** (If your device has Wi-Fi)
+        -  **Wake Lock** 
+        -  **Autostart**
+        -  **Debug Mode** (Provides console output for Pi-hole status)
+     -  Open **Properties Menu** (To the right of the 'Stop' button)
+        -  Distribution: **rootfs.tar**
+        -  Source Path - This varies depending on the device, ie: **${EXTERNAL_STORAGE}/Download/p4a17.tgz**
+        -  Image size (MB): **4000** (Recommmended, for smaller devices minimum is 2000 MB)
+        -  Set password for user **android**
+        -  Init -> **Enable**
+     -  Open **Options** Menu (Three dots at top right of screen)
+        -  Select **Install** and "OK" to confirm. 
+        -  Wait a few minutes for the image to install.
+          
+     -  When install is complete, the Linux Deploy console window will show the following at the end of the console output: 
 
         `````[HH:mm:ss] >>> :: Configuring core/profile ...`````
         
@@ -43,12 +52,8 @@ Pi-hole for Android is a CentOS disk image for [Linux Deploy](https://play.googl
         `````[HH:mm:ss] >>> deploy`````
         
     -  **Before you continue, make sure the Linux Deploy Console is free of error messages.**  If there are errors, troubleshoot by verifying the location of **p4a16.tgz** using a [file manager](https://github.com/DesktopECHO/Pi-hole-for-Android/wiki/Trouble-finding-path-where-Pi%E2%80%90hole-image-is-downloaded,-or-errors-are-reported-during-creation-of-Pi%E2%80%90hole-disk-image.) as the path can vary by device.  If you have trouble installing the image in Linux Deploy it may be because of SELinux.  See this [post on XDA](https://forum.xda-developers.com/t/app-tool-2-0-official-the-selinux-switch.3656502/) for an APK to disable SELinux.  
-          
- - Open the 'Hamburger menu' (Three dashes at top left) and touch **Settings**
-    -  Place checkmark on **Lock Wi-Fi** (If your device has Wi-Fi)
-    -  Place checkmark on **Autostart**
-    
-Touch the **[ ▸ START ]** button and confirm. 
+  
+Touch the **[ ▸ START ]** button, and "OK" to confirm - The instance takes a few seconds to "boot" 
 
 -----------------------------------------------------------
 **INSTALLATION COMPLETE - PI-HOLE IS RUNNING ON YOUR ANDROID DEVICE!**

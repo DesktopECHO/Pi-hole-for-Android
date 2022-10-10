@@ -1,3 +1,4 @@
+# vim /etc/rc.d/init.d/dropbear
 #!/bin/bash
 #
 # description: dropbear ssh daemon
@@ -52,7 +53,7 @@ start() {
         echo
     exit 0
 fi
-    echo -n "Starting dropbear: "
+    echo -n "Starting dropbear:             "
     daemon --pidfile="$pidfile" $dropbear -p $port -d $dsskey -r $rsakey
     RETVAL=$?
     echo
@@ -115,3 +116,4 @@ genrsakey)
     usage
     ;;
 esac
+

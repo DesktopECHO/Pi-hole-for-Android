@@ -17,7 +17,7 @@ start() {
         echo
     exit 0
 fi
-    echo -n "Starting unbound: "
+    echo -n "Starting unbound:              "
     daemon --pidfile="$pidfile" $binary
     RETVAL=$?
     echo
@@ -37,12 +37,13 @@ stop() {
         exit 1
     fi
         echo -n "Stopping unbound daemon: "
-        pkill -HUP unbound
+        pkill -9 -u unbound
         RETVAL=$?
         echo
                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
     if [ $RETVAL -eq 0 ]; then
         rm -f $lockfile $pidfile
+        pkill -9 -u unbound
         return 0
     else
         return 1

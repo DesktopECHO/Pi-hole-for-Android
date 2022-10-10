@@ -17,7 +17,7 @@ start() {
         echo
     exit 0
 fi
-    echo -n "Starting crond: "
+    echo -n "Starting crond:                "
     daemon --pidfile="$pidfile" $binary
     RETVAL=$?
     echo

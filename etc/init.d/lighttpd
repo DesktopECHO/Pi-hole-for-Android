@@ -17,7 +17,7 @@ start() {
         echo
     exit 0
 fi
-    echo -n "Starting lighttpd: "
+    echo -n "Starting lighttpd:             "
     daemon --pidfile="$pidfile" $binary -f /etc/lighttpd/lighttpd.conf
     RETVAL=$?
     echo

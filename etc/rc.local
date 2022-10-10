@@ -1,10 +1,28 @@
-#!/bin/bash
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides: rc.local
+# Required-Start: 
+# Required-Stop: 
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
+# Short-Description: Start daemon at boot time
+# Description: Start P4A
+### END INIT INFO
 
-# Clean-up environment for startup, update PADD, install unbound for new deployment
+case "$1" in
+start)
+
+# Clean-up environment before startup, update PADD, install unbound for new deployment
 ntpd -gq
-curl --silent --output /bin/padd https://raw.githubusercontent.com/pi-hole/PADD/master/padd.sh
+curl --silent --output /bin/padd https://raw.githubusercontent.com/pi-hole/PADD/master/padd.sh &
 rm -rf /sbin/service /var/lock/subsys/* /tmp/* /var/run/*.pid /sbin/poweroff /sbin/reboot /bin/pihole
-/bin/cp /.service /sbin/service ; /bin/cp /.poweroff /sbin/poweroff ; /bin/cp /.reboot /sbin/reboot; /bin/cp /.service /bin/update-rc.d ; ln -s /usr/local/bin/pihole /bin/pihole ; /bin/cp /.systemctl /usr/bin/systemctl ; /bin/cp /.motd /etc/motd
+/bin/cp /.service    /sbin/service
+/bin/cp /.poweroff   /sbin/poweroff
+/bin/cp /.reboot     /sbin/reboot
+/bin/cp /.service    /bin/update-rc.d
+/bin/cp /.systemctl  /usr/bin/systemctl
+/bin/cp /.motd       /etc/motd
+ln -s /usr/local/bin/pihole /bin/pihole
 chmod +x /usr/bin/systemctl /sbin/poweroff /sbin/reboot /bin/padd
 [ ! -f /sbin/unbound ] && rpm -Uvh /rpm/*.rpm && cp /.pihole.conf /etc/unbound/conf.d/pihole.conf
 
@@ -35,10 +53,10 @@ sed -i "/IPV4_ADDRESS/c\IPV4_ADDRESS=$ipaddr/$subnetmask" /etc/pihole/setupVars.
 sed -i "/PIHOLE_INTERFACE/c\PIHOLE_INTERFACE=$device"     /etc/pihole/setupVars.conf
 
 # Start Services
-yes ' ' | sed 40q
+yes ' ' | sed 50q
 echo '_______________________________________'
 echo '                                       '
-echo '        Pi-hole for Android            '
+echo '      **  Pi-hole for Android  **      '
 echo ' '
 service syslog-ng  start
 service crond      start
@@ -46,11 +64,31 @@ service dropbear   start
 service xrdp       start
 service lighttpd   start
 service unbound    start
-
-# Quietly start FTL and get better reporting from pihole status
+# Quietly start FTL and get better status info after
 service pihole-FTL start > /var/log/pihole.log 2>&1
 pihole status
 echo '_______________________________________'
+;;
 
-# This needs to be at the end of rc.local
-touch /var/lock/subsys/local
+stop)
+yes ' ' | sed 50q
+echo '_______________________________________'
+echo '                                       '
+echo '          Shutting Down...             '
+echo ' '
+service unbound stop
+service lighttpd stop
+service xrdp stop
+service dropbear stop
+service crond stop
+service syslog-ng stop
+service pihole-FTL stop
+echo '_______________________________________'
+;;
+
+
+*)
+echo "Usage: $0 {start|stop}"
+exit 1
+esac
+exit 0

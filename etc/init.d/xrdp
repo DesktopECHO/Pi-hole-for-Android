@@ -19,7 +19,7 @@ start() {
         echo
     exit 0
 fi
-    echo -n "Starting xrdp: "
+    echo -n "Starting xrdp:                 "
     /sbin/xrdp-sesman
     daemon --pidfile="$pidfile" $binary
     RETVAL=$?

@@ -17,7 +17,7 @@ start() {
         echo
     exit 0
 fi
-    echo -n "Starting syslog-ng: "
+    echo -n "Starting syslog-ng:            "
     daemon --pidfile="$pidfile" $binary
     RETVAL=$?
     echo

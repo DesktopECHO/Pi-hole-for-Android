@@ -1,5 +1,4 @@
 # Pi-hole for Android APK Installer
-**Pi-hole for ARMv7 Android devices.**
 
 ![IMG_2229](https://user-images.githubusercontent.com/33142753/133272103-28c6eba3-d1f7-4e29-9c5b-7d96d9f94e9e.jpg)
 

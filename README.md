@@ -1,5 +1,5 @@
 # Pi-hole for Android
-**Pi-hole for ARMv7 (2011 and newer) Android devices.**
+**Pi-hole for ARMv7 Android devices.**
 
 ![IMG_2229](https://user-images.githubusercontent.com/33142753/133272103-28c6eba3-d1f7-4e29-9c5b-7d96d9f94e9e.jpg)
 
@@ -7,53 +7,25 @@
 
 Pi-hole is a network-level advertisement and Internet tracker blocking application for Linux which acts as a DNS sinkhole intended for use on a private network. It is designed for low-power embedded devices with network capability, focusing on the Raspberry Pi as its 'reference' hardware platform.
 
-Pi-hole for Android is a CentOS disk image for [Linux Deploy](https://play.google.com/store/apps/details?id=ru.meefik.linuxdeploy&hl=en_US&gl=US) that is tuned to work with the Pi-hole installer.  It can be used on **any** rooted Android device with an **ARMv7 or newer CPU**; this includes almost any Android device made in the past 10+ years. Form factor is not important; it could be a phone, tablet, HDMI stick or **any device running Android**.
+Pi-hole for Android is a Raspbian disk image tuned to work with the Pi-hole installer on Pi Deploy (a fork of Linux Deploy).  It can be used on **any** rooted Android device with an **ARMv7 or newer CPU** running Android 5.0 (Lolipop) or newer.  Form factor is not important; it could be a phone, tablet, HDMI stick or **any device running Android**.  For very old devices running Android 4.x, see the (Legacy branch)[https://github.com/DesktopECHO/Pi-hole-for-Android/tree/legacy]
 
 **Requirements:**
 
 - Android device that has been rooted
-- Developer Options -> Root Access -> **Enabled for Apps**
 
-**Instructions:**
+### Note to users of previous builds:
+- Uninstall any previous versions of Linux Depoy or Pi Deploy and reboot your device.
+- Failure to heed this advice will cause issues!
 
-- Open web browser on device and download+install the Linux Deploy APK.  You can also download this from the Play Store if preferred:
-
-  - Get the latest version at: **https://github.com/meefik/linuxdeploy/releases**
-  - Android 4.x requires an older release: **https://github.com/meefik/linuxdeploy/releases/tag/2.5.1**
-
--  Download the latest Pi-hole for Android disk image: 
-   - **[Release v1.7 - Octover 5, 2022](https://github.com/DesktopECHO/Pi-hole-for-Android/releases/download/v1.7/p4a17.tgz)**
-
-- Open **Linux Deploy** and change ONLY these settings:
-     -  Open the 'Hamburger menu' (Symbol with three dashes at top left of screen) then touch **Settings**.  Place a checkmark on these options:
-        -  **Lock Screen** (If you want to keep display always on)
-        -  **Lock Wi-Fi** (If your device has Wi-Fi)
-        -  **Wake Lock** 
-        -  **Autostart**
-        -  **Debug Mode** (Provides console output for Pi-hole status)
-     -  Open **Properties Menu** (To the right of the 'Stop' button)
-        -  Distribution: **rootfs.tar**
-        -  Source Path - This varies depending on the device, ie: **${EXTERNAL_STORAGE}/Download/p4a17.tgz**
-        -  Image size (MB): **4000** (Recommmended, for smaller devices minimum is 2000 MB)
-        -  Set password for user **android**
-        -  Init -> **Enable**
-     -  Open **Options** Menu (Three dots at top right of screen)
-        -  Select **Install** and "OK" to confirm. 
-        -  Wait a few minutes for the image to install.
-          
-     -  When install is complete, the Linux Deploy console window will show the following at the end of the console output: 
-
-        `````[HH:mm:ss] >>> :: Configuring core/profile ...`````
-        
-        `````[HH:mm:ss] >>> :: Configuring core/sudo ...`````
-        
-        `````[HH:mm:ss] >>> :: Configuring core/unchroot ...`````
-        
-        `````[HH:mm:ss] >>> deploy`````
-        
-    -  **Before you continue, make sure the Linux Deploy Console is free of error messages.**  If there are errors, troubleshoot by verifying the location of **p4a17.tgz** using a [file manager](https://github.com/DesktopECHO/Pi-hole-for-Android/wiki/Trouble-finding-path-where-Pi%E2%80%90hole-image-is-downloaded,-or-errors-are-reported-during-creation-of-Pi%E2%80%90hole-disk-image.) as the path can vary by device.  If you have trouble installing the image in Linux Deploy it may be because of SELinux.  See this [post on XDA](https://forum.xda-developers.com/t/app-tool-2-0-official-the-selinux-switch.3656502/) for an APK to disable SELinux.  
-  
-Touch the **[ ▸ START ]** button, and "OK" to confirm - The instance takes a few seconds to "boot" 
+### Installation:
+- Install [Pi Deploy APK](https://github.com/DesktopECHO/Pi-hole-for-Android/releases/latest/download/pideploy.apk)
+- Tap the main menu (**Three dots** at the top right of screen)
+- Tap **Install**
+- In a few minutes, the [Raspbian Pi-hole Image](https://github.com/DesktopECHO/Pi-hole-for-Android/releases/latest/download/raspbian.tgz) will be downloaded and installed on your device.
+- When deployment is complete, tap **[  ▷ START ]**  to launch the instance.
+- The instance will provide you with a password to login to Pi-hole webadmin or via SSH/RDP (Username: _android_, see screenshot below)
+- **Note**: The password appears only once when the image is deployed, make sure you record this information.
+- **Hint**:  The password text can be highlighted and copied to your clipboard for easier management. 
 
 -----------------------------------------------------------
 **INSTALLATION COMPLETE - PI-HOLE IS RUNNING ON YOUR ANDROID DEVICE!**
@@ -69,25 +41,27 @@ The Android device's IP is shown at the top of the Linux Deploy main window.  Yo
 
  - If your Android device has a display, you can RDP into the Pi-hole instance (as localhost) by installing the [Microsoft Remote Desktop](https://play.google.com/store/apps/details?id=com.microsoft.rdc.androidx) client.
 
-![image](https://user-images.githubusercontent.com/33142753/147254465-26443e85-6695-46e6-83f4-4c3ff1749804.png)
+![image](https://user-images.githubusercontent.com/33142753/196851777-e46b145f-4c99-4b6f-9add-ed2f009dae4b.png)
+
+![image](https://user-images.githubusercontent.com/33142753/196856874-72c307e3-2227-4ef1-a7b5-401e745f918f.png)
+
+![Screenshot_20221020-013907_Bromite](https://user-images.githubusercontent.com/33142753/196860440-1723d8c2-09b0-460b-901e-260b5485d554.png)
 
 **Pi-hole for Android wiki topics:**
 
-- [PADD is missing information / How to update](https://github.com/DesktopECHO/Pi-hole-for-Android/wiki/PADD-is-missing-information)
-- [Setting custom disk/shmem alert thresholds](https://github.com/DesktopECHO/Pi-hole-for-Android/wiki/Setting-custom-alert-thresholds-for-disk-and-shmem-monitoring)
-- [Linux Deploy - Trouble finding disk image or install location](https://github.com/DesktopECHO/Pi-hole-for-Android/wiki/Trouble-finding-path-where-Pi%E2%80%90hole-image-is-downloaded,-or-errors-are-reported-during-creation-of-Pi%E2%80%90hole-disk-image.)
+- [Pi/Linux Deploy - Trouble finding disk image or install location](https://github.com/DesktopECHO/Pi-hole-for-Android/wiki/Trouble-finding-path-where-Pi%E2%80%90hole-image-is-downloaded,-or-errors-are-reported-during-creation-of-Pi%E2%80%90hole-disk-image.)
 
 **Additional Info:**
 
 RDP Sessions launch the Openbox window manager with QTerminal in fullscreen mode.  To open a new tab hit **[Ctrl-Shift-T]** and to un-hide the menubar hit **[Ctrl-Shift-M]**
 
-You can restart (or "bounce") the Pi-hole instance in Linux Deploy by pressing **[ ■ STOP ]** and waiting a few seconds for the instance to indicate all services are stopped.  Restart the instance by pressing **[ ▸ START ]**
+You can restart (or "bounce") the Pi-hole instance in Pi Deploy by pressing **[ ■ STOP ]** and waiting a few seconds for the instance to indicate all services are stopped.  Restart the instance by pressing **[ ▸ START ]**
 
 When a Pi-hole instance starts up, the default setting is to let it automagically configure networking.  If you change networks on the Android device simply restart the instance for Pi-hole to pick up the new settings.
 
-Alternatively, set a static assignment by commenting-out two lines in ```/etc/rc.local``` (You will see which ones when you open the file in an editor.)  After the lines are commented out with a hash "#" you can manually add your IP, subnet and interface name to ```/etc/pihole/setupVars.conf```
+Alternatively, set a static assignment by commenting-out two lines in ```/etc/init.d/android-init``` (You will see which ones when you open the file in an editor.)  After the lines are commented out with a hash "#" you can manually add your IP, subnet and interface name to ```/etc/pihole/setupVars.conf```
 
-Added [Unbound](https://www.nlnetlabs.nl/projects/unbound/about) to provide encrypted DNS by default; no addional configuration is necessary.
+Added latest release of [Unbound 1.17](https://www.nlnetlabs.nl/projects/unbound/about) to provide encrypted DNS by default; no addional configuration is necessary but you may customiza to preference.
 
 The Pi-hole instance on Android otherwise behaves like it is running on a 'real' Raspberry-Pi or a standard PC.  Consult the extensive documentation online to learn how to fully leverage Pi-hole's functionality.
 

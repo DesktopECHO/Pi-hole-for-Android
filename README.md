@@ -29,7 +29,7 @@ Pi-hole for Android is a Raspbian disk image tuned to work with the Pi-hole inst
 - **Hint**:  The password text can be highlighted and copied to your clipboard for easier management. 
 
 -----------------------------------------------------------
-**INSTALLATION COMPLETE - PI-HOLE IS RUNNING ON YOUR ANDROID DEVICE!**
+**INSTALLATION COMPLETE // Pi-Hole is running on your Android Device**
 
 -----------------------------------------------------------
 The Android device's IP is shown at the top of the Linux Deploy main window.  You can interact with Pi-hole in several ways, the examples below use IP **_10.13.12.11_** 

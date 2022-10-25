@@ -1,4 +1,4 @@
-# Pi-hole for Android
+# Pi-hole for Android APK Installer
 **Pi-hole for ARMv7 Android devices.**
 
 ![IMG_2229](https://user-images.githubusercontent.com/33142753/133272103-28c6eba3-d1f7-4e29-9c5b-7d96d9f94e9e.jpg)
@@ -7,18 +7,20 @@
 
 Pi-hole is a network-level advertisement and Internet tracker blocking application for Linux which acts as a DNS sinkhole intended for use on a private network. It is designed for low-power embedded devices with network capability, focusing on the Raspberry Pi as its 'reference' hardware platform.
 
-Pi-hole for Android is a Raspbian disk image tuned to work with the Pi-hole installer on Pi Deploy (a fork of Linux Deploy).  It can be used on **any** rooted Android device with an **ARMv7 or newer CPU** running Android 5.0 (Lolipop) or newer.  Form factor is not important; it could be a phone, tablet, HDMI stick or **any device running Android**.  For very old devices running Android 4.x, see the (Legacy branch)[https://github.com/DesktopECHO/Pi-hole-for-Android/tree/legacy]
+Pi-hole for Android is a Raspbian disk image tuned to work with the Pi-hole installer on Pi Deploy (a fork of Linux Deploy).  It can be used on **any** rooted Android device with an **ARMv7 or newer CPU** running Android 5.0 (Lolipop) or newer.  Form factor is not important; it could be a phone, tablet, HDMI stick or **any device running Android**.  For very old devices running Android 4.x, see the [Legacy branch](https://github.com/DesktopECHO/Pi-hole-for-Android/tree/legacy)
 
-**Requirements:**
+### Requirements:
 
 - Android device that has been rooted
 
 ### Note to users of previous builds:
+
 - Uninstall any previous versions of Linux Depoy or Pi Deploy and reboot your device.
 - Failure to heed this advice will cause issues!
 
 ### Installation:
-- Install [Pi Deploy APK](https://github.com/DesktopECHO/Pi-hole-for-Android/releases/latest/download/pideploy.apk)
+
+- Install the latest [Pi Deploy APK](https://github.com/DesktopECHO/Pi-hole-for-Android/releases/latest/download/pideploy.apk)
 - Tap the main menu (**Three dots** at the top right of screen)
 - Tap **Install**
 - In a few minutes, the [Raspbian Pi-hole Image](https://github.com/DesktopECHO/Pi-hole-for-Android/releases/latest/download/raspbian.tgz) will be downloaded and installed on your device.

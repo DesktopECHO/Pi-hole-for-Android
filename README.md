@@ -29,16 +29,16 @@ Pi-hole for Android is a Raspbian disk image tuned to work with the Pi-hole inst
 - **Hint**:  The password text can be highlighted and copied to your clipboard for easier management. 
 
 -----------------------------------------------------------
-**INSTALLATION COMPLETE // Pi-Hole is running on your Android Device**
+**INSTALLATION COMPLETE    ·    Pi-Hole is running on your Android Device**
 
 -----------------------------------------------------------
-The Android device's IP is shown at the top of the Linux Deploy main window.  You can interact with Pi-hole in several ways, the examples below use IP **_10.13.12.11_** 
+The Android device's IP is shown at the top of the Linux Deploy main window.  You can interact with Pi-hole in several ways, the examples below use IP **_10.73.0.31_** 
 
- - From a Windows desktop, connect via RDP **->** **```mstsc.exe /v:10.13.12.11```**
+ - From a Windows desktop, connect via RDP **->** **```mstsc.exe /v:10.73.0.31```**
 
- - From a computer running Linux, connect via SSH **->** **```ssh android@10.13.12.11```**
+ - From a computer running Linux, connect via SSH **->** **```ssh android@10.73.0.31```**
 
- - Pi-hole administration is accessible from any browser on your network **->** **```http://10.13.12.11/admin```**
+ - Pi-hole administration is accessible from any browser on your network **->** **```http://10.73.0.31/admin```**
 
  - If your Android device has a display, you can RDP into the Pi-hole instance (as localhost) by installing the [Microsoft Remote Desktop](https://play.google.com/store/apps/details?id=com.microsoft.rdc.androidx) client.
 

@@ -19,7 +19,7 @@ Pi-hole for Android is a Raspbian disk image tuned to work with the Pi-hole inst
 
 ### Installation:
 
-- Install the latest [Pi Deploy APK](https://github.com/DesktopECHO/Pi-hole-for-Android/releases/latest/download/pideploy.apk)
+- Install the latest [Pi Deploy APK](https://github.com/DesktopECHO/Pi-hole-for-Android/releases/latest)
 - Tap the main menu (**Three dots** at the top right of screen)
 - Tap **Install**
 - In a few minutes, the [Raspbian Pi-hole Image](https://github.com/DesktopECHO/Pi-hole-for-Android/releases/latest/download/raspbian.tgz) will be downloaded and installed on your device.

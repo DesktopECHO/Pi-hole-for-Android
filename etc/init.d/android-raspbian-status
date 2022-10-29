@@ -1,0 +1,48 @@
+#!/bin/bash
+### BEGIN INIT INFO
+# Provides: android-raspbian-status
+# Required-Start:    $local_fs $network $time $remote_fs avahi-daemon
+# Required-Stop:     $local_fs $network $time $remote_fs syslog-ng
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
+# Short-Description: Daemon status at boot/shutdown
+# Description: Raspbian for Android Status
+### END INIT INFO
+
+case "$1" in
+start)
+
+yes ' ' | sed 50q
+cat /etc/*-release | egrep "PRETTY_NAME" | cut -d = -f 2 | tr -d '"'
+echo '______________________________________________'
+echo '                                              '
+pihole status
+yes ' ' | sed 1q
+   if [ -f /var/tmp/p4a ] ; then
+     P4A=`cat /var/tmp/p4a`
+     rm /var/tmp/p4a
+     echo " IMPORTANT: RDP/SSH/Pi-hole admin password is"
+     echo "            shown below only ONCE, record it!"
+     echo
+     echo "  --> $P4A <--"
+    else
+   pihole -v
+ fi
+echo '______________________________________________'
+echo
+;;
+
+stop)
+yes ' ' | sed 50q
+echo '______________________________________________'
+echo '                                              '
+echo '         *** Shut Down Initiated ***          '
+echo '______________________________________________'
+yes ' ' | sed 2q
+;;
+
+*)
+echo "Usage: $0 {start|stop}"
+exit 1
+esac
+exit 0

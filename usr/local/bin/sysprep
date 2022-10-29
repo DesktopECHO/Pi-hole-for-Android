@@ -1,27 +1,57 @@
 #!/bin/bash
-service xrdp stop
-service lighttpd stop
-service pihole-FTL stop
-service syslog-ng stop
-pkill xrdp
-pkill xrdp-sesman
+systemctl stop lighttpd
+systemctl stop pihole-FTL
+systemctl stop unbound
+systemctl stop dbus
+systemctl stop syslog-ng
+systemctl stop ssh
+killall -9 xrdp
+killall -9 xrdp-sesman
+killall -9 sshd
+killall -9 lighttpd
+killall -9 dbus-daemon
+killall -9 unbound
+dpkg --purge unbound
+mv /usr/bin/uname-shim /usr/bin/uname
+rm -rf /etc/ssl/private/ssl-cert-snakeoil.key
+rm -rf /etc/ssl/certs/ssl-cert-snakeoil.pem
 rm /etc/pihole/pihole-FTL.db
+rm -rf /var/lib/apt/*
 rm -rf /etc/dropbear/*
 rm -rf /home/android/.bash_history
+rm -rf /home/android/.xorg*
 rm -rf /root/.bash_history
 rm -rf /var/log/*.log
 rm -rf /var/tmp/*
 rm -rf /var/log/pihole/*
 rm -rf /var/log/*.gz
-rm -rf /var/log/cron
-rm -rf /var/log/kern
+rm -rf /var/log/apt
+rm -rf /var/log/btmp
+rm -rf /var/log/wtmp
+rm -rf /var/log/debug
+rm -rf /var/log/error
+rm -rf /var/log/faillog
+rm -rf /var/log/fsck
+rm -rf /var/log/journal
+rm -rf /var/log/lastlog
+rm -rf /var/log/debug
+rm -rf /var/log/kern.log
 rm -rf /var/log/systemctl.log
 rm -rf /var/log/lighttpd/*.log
-rm -rf /var/log/messages /var/log/secure
-rm -rf /etc/xrdp/*.pem /etc/xrdp/rsakeys.ini
-rm -rf /var/cache/yum/armhfp/7/*
+rm -rf /var/log/messages
+rm -rf /var/log/syslog
+rm -rf /var/lib/syslog-ng/syslog-ng.*
+rm -f /run/*
+rm -f /run/xrdp/*
+rm -f /run/pihole/*
+rm -f /run/sshd/*
+rm -f /run/dbus/*
+rm -rf /var/lib/apt/*
+rm -rf /etc/ssh/ssh_host_*
+touch /var/log/xrdp ; touch /var/log/xrdp.log ; touch /var/log/xrdp-sesman.log  ; chown root:xrdp /var/log/xrdp* ; chmod 660 /var/log/xrd*
+echo "127.0.0.1  localhost"                  >  /etc/hosts
+echo "::1        ip6-localhost ip6-loopback" >> /etc/hosts
 cd /home/android ; rm -rf .cache .pcsc* .ssh .vnc .rnd .pki .local .Xauthority .xsession* PADD.pid piHoleVersion thinclient_drives /tmp/* /tmp/.*
-rpm -e unbound ; rpm -e unbound-libs ; rm -rf /etc/unbound ; rm -rf /var/lib/unbound
-clear
-echo Turn off this instance and run image backup.
-sleep 60
+rm -rf /etc/unbound/*.key /etc/unbound/*.pem /etc/unbound/unbound.conf.d/pihole.conf
+read -p "Turn off this instance and run image backup or hit [Enter] to exit"
+exit

@@ -5,14 +5,14 @@
 # Author: bgstack15@gmail.com
 # Startdate: 2020-01-10 13:02:14
 # SPDX-License-Identifier: CC-BY-SA-4.0
-# Title:
-# Purpose:
+# Title: 
+# Purpose: 
 # Package: systemctl-service-shim
-# History:
+# History: 
 #    2020-05-14 place framework.sh contents inline so as not to depend on it.
 #    2021-01-10 adapted for inclusion in devuan-sanity
 #    2021-10-20 add /bin/systemctl symlink control logic
-# Usage:
+# Usage: 
 #    Should be mostly like systemctl from systemd.
 # Reference: ftemplate.sh 2019-05-02a ; framework.sh 2018-05-02a
 #    man 1 systemctl
@@ -414,7 +414,7 @@ case "${action}" in
       while test ${x:-${thiscount}} -le $(( thiscount - 1 )) && test ${thiscount} -gt 1 ;
       do
          eval thisopt="\${opt${x}}"
-         #thisopt="$( echo "${thisopt}" | sed -r -e 's/\.service$//;' )"
+         thisopt="$( echo "${thisopt}" | sed -r -e 's/\.service$//;' )"
          actionstatement="$( printf "%s" "service ${thisopt} ${action};" )"
          actionlist="${actionlist:+${actionlist} }${actionstatement}"
          x=$(( x + 1 ))
@@ -538,3 +538,4 @@ then
 fi
 # exit cleanly
 :
+

@@ -1,0 +1,45 @@
+Format: 1.8
+Date: Fri, 01 Apr 2022 12:08:42 +0200
+Source: xrdp
+Binary: xrdp xrdp-dbgsym
+Architecture: source arm64
+Version: 0.9.19-1
+Distribution: unstable
+Urgency: medium
+Maintainer: Debian Remote Maintainers <debian-remote@lists.debian.org>
+Changed-By: Dominik George <natureshadow@debian.org>
+Description:
+ xrdp       - Remote Desktop Protocol (RDP) server
+Closes: 990806 1005159
+Changes:
+ xrdp (0.9.19-1) unstable; urgency=medium
+ .
+   * New upstream version.
+   * Acknowledge NMUs - thanks to arnaudr and carnil!
+   * Drop patch for CVE-2022-23613; included upstream.
+   * Refresh patches.
+   * Also source ~/.profile in startwm; thanks to Raphaël Halimi
+     (Closes: #1005159)
+   * Install logrotate configuration; thanks to Evan Linde (Closes: #990806)
+   * Update d/copyright.
+Checksums-Sha1:
+ ecbf5b57316c0cd29540816e7c9cd9d6c1f3a66a 1338 xrdp_0.9.19-1.dsc
+ cd88ea49d63e4acdf45308e614b03137b3e038f3 2020366 xrdp_0.9.19.orig.tar.gz
+ c93e39c9ae573004454b6212be5c9d6bafe8b373 22912 xrdp_0.9.19-1.debian.tar.xz
+ 617fff484ef9863291ed1db4d8a1b711ac87934e 838556 xrdp-dbgsym_0.9.19-1_arm64.deb
+ db5cd3b6c0c8c94bb91455deb5417a525ef6d07a 7332 xrdp_0.9.19-1_arm64.buildinfo
+ ba139916c2660c34424b290914d5727ae0ea0f64 471148 xrdp_0.9.19-1_arm64.deb
+Checksums-Sha256:
+ d8c73b7ac5580b40577e09689500851d34401c7865a6cd65d1742d717445ca7f 1338 xrdp_0.9.19-1.dsc
+ 94017d30e475c6d7a24f651e16791551862ae46f82d8de62385e63393f5f93d0 2020366 xrdp_0.9.19.orig.tar.gz
+ c49a38c8fa4cdf4c5abe6dbfda411fb7d95b0548fb3972a12b10a0b3cb3db9aa 22912 xrdp_0.9.19-1.debian.tar.xz
+ b46a917df4cc4bbcaf8bd9dbe2b311baec34604fa3614886fa2ee34635603a7b 838556 xrdp-dbgsym_0.9.19-1_arm64.deb
+ 423dd47954e346f381f7455a4051adeca75a3bc339d3f0aaf35bdf20dc0bf531 7332 xrdp_0.9.19-1_arm64.buildinfo
+ fa3dba79e90cf4a60e35839a3b55d687b7aa8359c6fde957f0920b6d7e9ff114 471148 xrdp_0.9.19-1_arm64.deb
+Files:
+ 952e97b7ee4186e7f244b181a3cf2cf2 1338 net optional xrdp_0.9.19-1.dsc
+ 2e60a2e874f95723a4cdd0b466bbe7e4 2020366 net optional xrdp_0.9.19.orig.tar.gz
+ b70e42007f0fd4c1c66a5247968af9a5 22912 net optional xrdp_0.9.19-1.debian.tar.xz
+ f0c6fadf0c8cec2baff9c59ca2810229 838556 debug optional xrdp-dbgsym_0.9.19-1_arm64.deb
+ bac72ab40fe54a7087c95482b866d984 7332 net optional xrdp_0.9.19-1_arm64.buildinfo
+ 4aed3752e26e74692aad0443d9194355 471148 net optional xrdp_0.9.19-1_arm64.deb

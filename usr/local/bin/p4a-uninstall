@@ -1,2 +1,0 @@
-#!/bin/bash
-[ -f /usr/local/bin/pihole ] && service pihole-FTL stop && service lighttpd stop && pihole uninstall

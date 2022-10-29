@@ -14,7 +14,7 @@ Pi-hole for Android is a Raspbian disk image tuned to work with the Pi-hole inst
 
 ### Note to users of previous builds:
 
-- Uninstall any previous versions of Linux Depoy or Pi Deploy and reboot your device.
+- Uninstall any previous versions of Linux Deploy or Pi Deploy and reboot your device.
 - Failure to heed this advice will cause issues!
 
 ### Installation:
@@ -62,7 +62,7 @@ When a Pi-hole instance starts up, the default setting is to let it automagicall
 
 Alternatively, set a static assignment by commenting-out two lines in ```/etc/init.d/android-init``` (You will see which ones when you open the file in an editor.)  After the lines are commented out with a hash "#" you can manually add your IP, subnet and interface name to ```/etc/pihole/setupVars.conf```
 
-Added latest release of [Unbound 1.17](https://www.nlnetlabs.nl/projects/unbound/about) to provide encrypted DNS by default; no addional configuration is necessary but you may customiza to preference.
+Added latest release of [Unbound 1.17](https://www.nlnetlabs.nl/projects/unbound/about) to provide encrypted DNS by default; no addional configuration is necessary but you may customize to preference.
 
 The Pi-hole instance on Android otherwise behaves like it is running on a 'real' Raspberry-Pi or a standard PC.  Consult the extensive documentation online to learn how to fully leverage Pi-hole's functionality.
 

@@ -2,7 +2,7 @@
 ### BEGIN INIT INFO
 # Provides: android-raspbian-status
 # Required-Start:    $local_fs $network $time $remote_fs avahi-daemon
-# Required-Stop:     $local_fs $network $time $remote_fs syslog-ng
+# Required-Stop:     $local_fs $network $time $remote_fs $syslog
 # Default-Start: 2 3 4 5
 # Default-Stop: 0 1 6
 # Short-Description: Daemon status at boot/shutdown
@@ -11,6 +11,13 @@
 
 case "$1" in
 start)
+
+killall -9 lighttpd          &>> /tmp/p4a.tmp
+systemctl restart lighttpd   &>> /tmp/p4a.tmp
+killall -9 pihole-FTL        &>> /tmp/p4a.tmp
+systemctl restart pihole-FTL &>> /tmp/p4a.tmp
+killall -9 ssh               &>> /tmp/p4a.tmp
+systemctl restart ssh        &>> /tmp/p4a.tmp
 
 yes ' ' | sed 50q
 cat /etc/*-release | egrep "PRETTY_NAME" | cut -d = -f 2 | tr -d '"'
@@ -33,10 +40,11 @@ echo
 ;;
 
 stop)
+
 yes ' ' | sed 50q
 echo '______________________________________________'
 echo '                                              '
-echo '         *** Shut Down Initiated ***          '
+echo '     *** Raspbian Instance Terminated ***     '
 echo '______________________________________________'
 yes ' ' | sed 2q
 ;;

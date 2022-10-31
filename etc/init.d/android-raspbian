@@ -1,7 +1,7 @@
 #!/bin/bash
 ### BEGIN INIT INFO
 # Provides: android-raspbian
-# Required-Start:
+# Required-Start: avahi-daemon pihole-FTL
 # Required-Stop:
 # Default-Start: 2 3 4 5
 # Default-Stop:
@@ -11,6 +11,7 @@
 
 case "$1" in
 start)
+        mkdir -p /run/user/60000 ; chown -R android:android /run/user/60000 ; chmod -R 700 /run/user/60000
         # Allow daemons to listen on network
         sed -i "/aid_inet/c\aid_inet:x:3003:android,root,messagebus,pihole,unbound,xrdp,sshd,avahi,postfix,postdrop,redis,www-data,pi,ncp,prometheus,sambashare,mysql" /etc/group
         # Force time sync to help devices without RTC
@@ -35,21 +36,21 @@ start)
         if [ ! -f /sbin/unbound ]; then
                 yes ' ' | sed 50q
                 echo ;  echo '___________________________________________' ; echo
-                echo "Setting up new deployment, please wait..." ; echo ; echo
+                echo "Deploying Raspbian Instance, please wait..." ; echo ; echo
                 # Create setupCars.conf
                 /bin/cp /.setupVars /etc/pihole/setupVars.conf
-                dpkg-reconfigure openssh-server  &>> /tmp/p4a.tmp
                 openssl req -new -newkey rsa:4096 -days 3650 -nodes -x509 -subj "/C=bm/ST=Pembroke/L=Hamilton/O=DesktopECHO/CN=$hstnm.local" -keyout /etc/ssl/private/ssl-cert-snakeoil.key -out /etc/ssl/certs/ssl-cert-snakeoil.pem &>> /tmp/p4a.tmp
                 chown root:xrdp /etc/ssl/certs/ssl-cert-snakeoil.pem ; chmod 660 /etc/ssl/certs/ssl-cert-snakeoil.pem
                 chown root:xrdp /etc/ssl/private/ssl-cert-snakeoil.key  ; chmod 660  /etc/ssl/private/ssl-cert-snakeoil.key
                 adduser xrdp ssl-cert &>> /tmp/p4a.tmp
+                echo "Regenerate SSH Keys..."
+                dpkg-reconfigure openssh-server &>> /tmp/p4a.tmp
                 echo "Installing Unbound..."
                 dpkg -i /deb/unbound_*.deb &>> /tmp/p4a.tmp
                 cp /.pihole.conf /etc/unbound/unbound.conf.d/pihole.conf
                 /etc/init.d/unbound restart &>> /tmp/p4a.tmp
                 echo "Installing Pi-hole..."
                 curl -L https://install.pi-hole.net | bash /dev/stdin --unattended
-                pkill pihole-FTL
                 echo "142.250.80.3 connectivitycheck.gstatic.com" > /etc/pihole/custom.list
                 PASSWORD=$(xkcdpass -C first -n 4 -d-)
                 echo -e "$PASSWORD\n$PASSWORD" | passwd "android" &>> /tmp/p4a.tmp

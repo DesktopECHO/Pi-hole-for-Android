@@ -19,14 +19,15 @@ Pi-hole for Android is a Raspbian disk image tuned to work with the Pi-hole inst
 
 ### Installation:
 
-- Install the latest [Pi Deploy APK](https://github.com/DesktopECHO/Pi-hole-for-Android/releases/latest)
+- Download and Install the latest [Pi Deploy APK](https://github.com/DesktopECHO/Pi-hole-for-Android/releases/latest/download/pideploy.apk)
 - Tap the main menu (**Three dots** at the top right of screen)
-- Tap **Install**
-- In a few minutes, the [Raspbian Pi-hole Image](https://github.com/DesktopECHO/Pi-hole-for-Android/releases/latest/download/raspbian.tgz) will be downloaded and installed on your device.
+- Tap **New Deployment**
+- In a few minutes, the [Raspbian Image](https://github.com/DesktopECHO/linuxdeploy-images/releases/latest/download/raspbian.tgz) will be downloaded and installed on your device.
 - When deployment is complete, tap **[  ▷ START ]**  to launch the instance.
-- The instance will provide you with a password to login to Pi-hole webadmin or via SSH/RDP (Username: _android_, see screenshot below)
+- The instance will provide you with a password for Pi-hole admin, SSH and RDP access (Username: _android_, see screenshot below)
 - **Note**: The password appears only once when the image is deployed, make sure you record this information.
-- **Hint**:  The password text can be highlighted and copied to your clipboard for easier management. 
+- **Hint**:  The password text can be copy/pasted to other Android apps (like Remote Desktop) 
+- _(Optional, post-install)_ To install PIXEL Desktop run `pideploy-gui-install` and restart the instance.  Next time you login via RDP you will have a full desktop session with audio support.
 
 -----------------------------------------------------------
 **INSTALLATION COMPLETE    ·    Pi-Hole is running on your Android Device**
@@ -42,11 +43,11 @@ The Android device's IP is shown at the top of the Linux Deploy main window.  Yo
 
  - If your Android device has a display, you can RDP into the Pi-hole instance (as localhost) by installing the [Microsoft Remote Desktop](https://play.google.com/store/apps/details?id=com.microsoft.rdc.androidx) client.
 
-![image](https://user-images.githubusercontent.com/33142753/196851777-e46b145f-4c99-4b6f-9add-ed2f009dae4b.png)
+<img width="1586" alt="image" src="https://user-images.githubusercontent.com/33142753/200673465-dca797d6-04b3-4b39-bfd1-56c472c7cff7.png">
 
-![image](https://user-images.githubusercontent.com/33142753/196856874-72c307e3-2227-4ef1-a7b5-401e745f918f.png)
+<img width="1508" alt="image" src="https://user-images.githubusercontent.com/33142753/200677147-bd8230bb-39df-4aab-b4da-ef64e5d00f08.png">
 
-![Screenshot_20221020-013907_Bromite](https://user-images.githubusercontent.com/33142753/196860440-1723d8c2-09b0-460b-901e-260b5485d554.png)
+<img width="1364" alt="image" src="https://user-images.githubusercontent.com/33142753/200670602-647fa8d3-5750-4d21-8c0c-c059e011fe6f.png">
 
 **Pi-hole for Android wiki topics:**
 

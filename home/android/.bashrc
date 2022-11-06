@@ -1,0 +1,6 @@
+alias systemctl="sudo /sbin/systemctl"
+alias  poweroff="sudo /sbin/poweroff"
+alias  unchroot="sudo /sbin/unchroot"
+alias   service="sudo /sbin/service"
+alias    reboot="sudo /sbin/reboot"
+alias        su="sudo su"

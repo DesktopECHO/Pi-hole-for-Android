@@ -41,5 +41,10 @@ gconftool --type boolean --set /apps/gksu/sudo-mode "True"
 # We'll never use lightdm in a container so disable it
 sudo update-rc.d lightdm remove
 
+# Tweak lxterminal
+mkdir -p ~/.config/lxterminal
+echo "[general]" > ~/.config/lxterminal/lxterminal.conf
+echo "fontname=Cascadia Code 14" >> ~/.config/lxterminal/lxterminal.conf
+
 # Cleanup...
 cd / ; rm -rf /tmp/android

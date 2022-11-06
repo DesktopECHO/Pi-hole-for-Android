@@ -38,21 +38,21 @@ start)
                 echo ;  echo '___________________________________________' ; echo
                 echo "Deploying Raspbian Instance, please wait..." ; echo ; echo
                 # Build setupVars.conf
-		mkdir -p /etc/pihole
-	  	/bin/cp /.setupVars /etc/pihole/setupVars.conf
+                mkdir -p /etc/pihole
+                /bin/cp /.setupVars /etc/pihole/setupVars.conf
                 openssl req -new -newkey rsa:4096 -days 3650 -nodes -x509 -subj "/C=bm/ST=Pembroke/L=Hamilton/O=DesktopECHO/CN=$hstnm.local" -keyout /etc/ssl/private/ssl-cert-snakeoil.key -out /etc/ssl/certs/ssl-cert-snakeoil.pem &>> /tmp/p4a.tmp
                 chown root:xrdp /etc/ssl/certs/ssl-cert-snakeoil.pem ; chmod 660 /etc/ssl/certs/ssl-cert-snakeoil.pem
                 chown root:xrdp /etc/ssl/private/ssl-cert-snakeoil.key  ; chmod 660  /etc/ssl/private/ssl-cert-snakeoil.key
                 adduser xrdp ssl-cert &>> /tmp/p4a.tmp
                 echo "Regenerate SSH Keys..."
                 dpkg-reconfigure openssh-server &>> /tmp/p4a.tmp
-		/etc/init.d/ssh stop &>> /tmp/p4a.tmp
+                /etc/init.d/ssh stop &>> /tmp/p4a.tmp
                 echo "Installing Unbound..."
                 dpkg -i /deb/unbound_*armhf.deb &>> /tmp/p4a.tmp
                 cp /.pihole.conf /etc/unbound/unbound.conf.d/pihole.conf
                 /etc/init.d/unbound restart &>> /tmp/p4a.tmp
                 echo "Installing Pi-hole..."
-		wget -q -O basic-install.sh https://install.pi-hole.net
+                wget -q -O basic-install.sh https://install.pi-hole.net
                 bash ./basic-install.sh --unattended
                 /etc/init.d/pihole-FTL stop &>> /tmp/p4a.tmp
                 echo "142.250.80.3 connectivitycheck.gstatic.com" > /etc/pihole/custom.list
@@ -88,23 +88,23 @@ EOF
 echo 'exit 0' > /usr/sbin/policy-rc.d
 chmod +x /usr/sbin/policy-rc.d
         # Clean-up environment before startup
-        rm -rf /usr/bin/systemctl /sbin/service /var/lock/subsys/* /tmp/* /var/run/* /sbin/poweroff /sbin/reboot
+        rm -rf /bin/systemctl /bin/reboot /bin/poweroff /bin/service /var/lock/subsys/* /tmp/* /var/run/* /sbin/poweroff /sbin/reboot
         /bin/cp /.service    /sbin/service
         /bin/cp /.poweroff   /sbin/poweroff
         /bin/cp /.reboot     /sbin/reboot
-        /bin/cp /.systemctl  /usr/sbin/systemctl
+        /bin/cp /.systemctl  /sbin/systemctl
         /bin/cp /.xrdp.ini   /etc/xrdp/xrdp.ini
         /bin/cp /.logo.bmp   /etc/xrdp/logo.bmp
 
-	#  By default, when an instance is started Pi-hole networking
-	#  is automagically configured.  When you change netwokrks on the
-	#  Android device, stop the Linux Deploy instance and re-start it.
-	#
-	#  Alternatively, set static assignment by commentng-out
-	#  the next 2 lines.  Manually add your IP, subnet
-	#  and interface name to /etc/pihole/setupVars.conf
-	sed -i "/IPV4_ADDRESS/c\IPV4_ADDRESS=$ipaddr/$subnetmask" /etc/pihole/setupVars.conf
-	sed -i "/PIHOLE_INTERFACE/c\PIHOLE_INTERFACE=$device"     /etc/pihole/setupVars.conf
+        #  By default, when an instance is started Pi-hole networking
+        #  is automagically configured.  When you change netwokrks on the
+        #  Android device, stop the Linux Deploy instance and re-start it.
+        #
+        #  Alternatively, set static assignment by commentng-out
+        #  the next 2 lines.  Manually add your IP, subnet
+        #  and interface name to /etc/pihole/setupVars.conf
+        sed -i "/IPV4_ADDRESS/c\IPV4_ADDRESS=$ipaddr/$subnetmask" /etc/pihole/setupVars.conf
+        sed -i "/PIHOLE_INTERFACE/c\PIHOLE_INTERFACE=$device"     /etc/pihole/setupVars.conf
 ;;
 
 stop)

@@ -12,29 +12,25 @@
 case "$1" in
 start)
 
-killall -9 lighttpd          &>> /tmp/p4a.tmp
-systemctl restart lighttpd   &>> /tmp/p4a.tmp
-killall -9 pihole-FTL        &>> /tmp/p4a.tmp
-systemctl restart pihole-FTL &>> /tmp/p4a.tmp
-killall -9 ssh               &>> /tmp/p4a.tmp
-systemctl restart ssh        &>> /tmp/p4a.tmp
-
 yes ' ' | sed 50q
-cat /etc/*-release | egrep "PRETTY_NAME" | cut -d = -f 2 | tr -d '"'
+DIST=$(cat /etc/*-release | egrep "PRETTY_NAME" | cut -d = -f 2 | tr -d '"')
+echo $DIST on $HOSTNAME
 echo '______________________________________________'
 echo '                                              '
-pihole status
-yes ' ' | sed 1q
-   if [ -f /var/tmp/p4a ] ; then
-     P4A=`cat /var/tmp/p4a`
-     rm /var/tmp/p4a
-     echo " IMPORTANT: RDP/SSH/Pi-hole admin password is"
-     echo "            shown below only ONCE, record it!"
-     echo
-     echo "  --> $P4A <--"
-    else
    pihole -v
- fi
+   if [ -f /var/tmp/p4a ] ; then
+      P4A=`cat /var/tmp/p4a`
+      rm /var/tmp/p4a
+      echo
+      echo " IMPORTANT: RDP/SSH/Pi-hole admin password is"
+      echo "            shown below only ONCE, record it!"
+      echo " "
+      echo "  --> $P4A <--"
+      P4A="NOPE"
+    else
+     echo " "
+     pihole status
+  fi
 echo '______________________________________________'
 echo
 ;;
@@ -44,7 +40,7 @@ stop)
 yes ' ' | sed 50q
 echo '______________________________________________'
 echo '                                              '
-echo '     *** Raspbian Instance Terminated ***     '
+echo '      *** Raspbian is Shutting Down ***       '
 echo '______________________________________________'
 yes ' ' | sed 2q
 ;;

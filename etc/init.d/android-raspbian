@@ -1,8 +1,8 @@
 #!/bin/bash
 ### BEGIN INIT INFO
 # Provides: android-raspbian
-# Required-Start: avahi-daemon pihole-FTL
-# Required-Stop:
+# Required-Start:
+# Required-Stop: ssh lighttpd pihole-FTL
 # Default-Start: 2 3 4 5
 # Default-Stop:
 # Short-Description: Raspbian for Android Initialization
@@ -11,9 +11,10 @@
 
 case "$1" in
 start)
-        mkdir -p /run/user/60000 ; chown -R android:android /run/user/60000 ; chmod -R 700 /run/user/60000
+        yes ' ' | sed 50q
+        dbus-uuidgen --ensure
         # Allow daemons to listen on network
-        sed -i "/aid_inet/c\aid_inet:x:3003:android,root,messagebus,pihole,unbound,xrdp,sshd,avahi,postfix,postdrop,redis,www-data,pi,ncp,prometheus,sambashare,mysql" /etc/group
+        sed -i "/aid_inet/c\aid_inet:x:3003:android,root,messagebus,pihole,unbound,xrdp,sshd,avahi,postfix,postdrop,redis,www-data,ncp,prometheus,sambashare,mysql" /etc/group
         # Force time sync to help devices without RTC
         sntp -t 5 -Ss -M 128 132.163.97.4 128.138.140.50 132.163.97.7 &>> /tmp/p4a.tmp
         # IP / subnet / interface detection
@@ -21,36 +22,39 @@ start)
         device=$(ip route list table main | tail -n1 | cut -d' ' -f 3)
         ipaddr=$(ip route list table main | tail -n1) ; ipaddr=`echo $ipaddr | awk -F' ' ' { print $(NF-0) } '`
         # Derive hostname from device name (or set to your preference)
-        hostname=$(unchroot getprop ro.product.device) # 'or' hostname="Raspbian"
+        hostname=$(unchroot getprop ro.product.device) # 'Or' # hostname="Raspbian"
         hstnm=$(echo $hostname | sed -e 's/ /-/g' |  sed -e 's/_/-/g'| sed -e 's/--//g')
         echo $hstnm > /proc/sys/kernel/hostname
         echo $hstnm > /etc/hostname ; sed -i "/$ipaddr/d" "/etc/hosts" ; sed -i "/$hstnm/d" "/etc/hosts"
         echo $ipaddr $hstnm $hstnm.local >> /etc/hosts
-        yes ' ' | sed 3q
+        echo ;  echo '___________________________________________' ; echo
         echo " Hostname: $hstnm"
         echo "IP/Subnet: $ipaddr/$subnetmask"
         echo "Interface: $device"
+        echo '___________________________________________'
         yes ' ' | sed 2q
-        curl --silent --output /bin/padd https://raw.githubusercontent.com/pi-hole/PADD/master/padd.sh &
         export DEBIAN_FRONTEND=noninteractive
         if [ ! -f /sbin/unbound ]; then
-                yes ' ' | sed 50q
                 echo ;  echo '___________________________________________' ; echo
                 echo "Deploying Raspbian Instance, please wait..." ; echo ; echo
-                # Create setupCars.conf
-                /bin/cp /.setupVars /etc/pihole/setupVars.conf
+                # Build setupVars.conf
+		mkdir -p /etc/pihole
+	  	/bin/cp /.setupVars /etc/pihole/setupVars.conf
                 openssl req -new -newkey rsa:4096 -days 3650 -nodes -x509 -subj "/C=bm/ST=Pembroke/L=Hamilton/O=DesktopECHO/CN=$hstnm.local" -keyout /etc/ssl/private/ssl-cert-snakeoil.key -out /etc/ssl/certs/ssl-cert-snakeoil.pem &>> /tmp/p4a.tmp
                 chown root:xrdp /etc/ssl/certs/ssl-cert-snakeoil.pem ; chmod 660 /etc/ssl/certs/ssl-cert-snakeoil.pem
                 chown root:xrdp /etc/ssl/private/ssl-cert-snakeoil.key  ; chmod 660  /etc/ssl/private/ssl-cert-snakeoil.key
                 adduser xrdp ssl-cert &>> /tmp/p4a.tmp
                 echo "Regenerate SSH Keys..."
                 dpkg-reconfigure openssh-server &>> /tmp/p4a.tmp
+		/etc/init.d/ssh stop &>> /tmp/p4a.tmp
                 echo "Installing Unbound..."
-                dpkg -i /deb/unbound_*.deb &>> /tmp/p4a.tmp
+                dpkg -i /deb/unbound_*armhf.deb &>> /tmp/p4a.tmp
                 cp /.pihole.conf /etc/unbound/unbound.conf.d/pihole.conf
                 /etc/init.d/unbound restart &>> /tmp/p4a.tmp
                 echo "Installing Pi-hole..."
-                curl -L https://install.pi-hole.net | bash /dev/stdin --unattended
+		wget -q -O basic-install.sh https://install.pi-hole.net
+                bash ./basic-install.sh --unattended
+                /etc/init.d/pihole-FTL stop &>> /tmp/p4a.tmp
                 echo "142.250.80.3 connectivitycheck.gstatic.com" > /etc/pihole/custom.list
                 PASSWORD=$(xkcdpass -C first -n 4 -d-)
                 echo -e "$PASSWORD\n$PASSWORD" | passwd "android" &>> /tmp/p4a.tmp
@@ -63,14 +67,14 @@ start)
 
         # Uname shim for armhf distro on aarch64 cpu
         if [ $(dpkg --print-architecture) = armhf ] && [ $(uname -m) = aarch64 ]; then
-                [ $(wc -c <"/bin/uname") -ge 1024 ] && mv /bin/uname /bin/uname-shim && echo "(uname-shim \$1) |  sed 's+aarch64+armv7lol+g'" > /bin/uname && chmod +x /bin/uname
+                [ $(wc -c <"/bin/uname") -ge 1024 ] && mv /bin/uname /bin/uname-shim && echo "(uname-shim \$1) |  sed 's+aarch64+armhf+'" > /bin/uname && chmod +x /bin/uname
         fi
 
         # Update PADD
         curl --silent --output /bin/padd https://raw.githubusercontent.com/pi-hole/PADD/master/padd.sh &
 
         # Setup environment and ensure users are in right groups
-        rm -f /usr/sbin/runlevel ; echo 'echo N 2' > /usr/sbin/runlevel ; chmod +x /usr/sbin/runlevel
+        rm -f /usr/sbin/runlevel ; echo 'echo N 3' > /usr/sbin/runlevel ; chmod +x /usr/sbin/runlevel
         dpkg-divert --local --rename --add /sbin/initctl &>> /tmp/p4a.tmp
         ln -fs /bin/true /sbin/initctl
         tee /usr/sbin/policy-rc.d > /dev/null <<EOF
@@ -83,10 +87,7 @@ exit 101
 EOF
 echo 'exit 0' > /usr/sbin/policy-rc.d
 chmod +x /usr/sbin/policy-rc.d
-
         # Clean-up environment before startup
-        mv /etc/rc0.d/K01android-raspbian-status  /etc/rc0.d/K90android-raspbian-status &> /dev/null
-        mv /etc/rc6.d/K01android-raspbian-status  /etc/rc6.d/K90android-raspbian-status &> /dev/null
         rm -rf /usr/bin/systemctl /sbin/service /var/lock/subsys/* /tmp/* /var/run/* /sbin/poweroff /sbin/reboot
         /bin/cp /.service    /sbin/service
         /bin/cp /.poweroff   /sbin/poweroff
@@ -95,15 +96,15 @@ chmod +x /usr/sbin/policy-rc.d
         /bin/cp /.xrdp.ini   /etc/xrdp/xrdp.ini
         /bin/cp /.logo.bmp   /etc/xrdp/logo.bmp
 
-#  When an instance is started, the default setting is to let
-#  it automagically configure networking.  When you change netwokrks
-#  on the Android device stop the Linux Deploy instance and re-start it.
-#
-#  Alternatively, set a static assignment by commentng-out
-#  the next 2 lines.  This lets you manually add your IP, subnet
-#  and interface name to /etc/pihole/setupVars.conf
-sed -i "/IPV4_ADDRESS/c\IPV4_ADDRESS=$ipaddr/$subnetmask" /etc/pihole/setupVars.conf
-sed -i "/PIHOLE_INTERFACE/c\PIHOLE_INTERFACE=$device"     /etc/pihole/setupVars.conf
+	#  By default, when an instance is started Pi-hole networking
+	#  is automagically configured.  When you change netwokrks on the
+	#  Android device, stop the Linux Deploy instance and re-start it.
+	#
+	#  Alternatively, set static assignment by commentng-out
+	#  the next 2 lines.  Manually add your IP, subnet
+	#  and interface name to /etc/pihole/setupVars.conf
+	sed -i "/IPV4_ADDRESS/c\IPV4_ADDRESS=$ipaddr/$subnetmask" /etc/pihole/setupVars.conf
+	sed -i "/PIHOLE_INTERFACE/c\PIHOLE_INTERFACE=$device"     /etc/pihole/setupVars.conf
 ;;
 
 stop)

@@ -2,7 +2,8 @@
 #
 # Raspbian GUI Installer for Pi Deploy
 #
-echo Installing Raspbian PIXEL Desktop environment....
+
+clear ; read -p "Hit [Enter] to install Raspbian PIXEL Desktop environment, CTRL-C to exit "
 mkdir /tmp/android ; cd /tmp/android
 sudo apt-get update
 

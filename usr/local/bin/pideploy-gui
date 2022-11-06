@@ -1,30 +1,44 @@
 #!/bin/bash
+#
+# Raspbian GUI Installer for Pi Deploy
+#
 echo Installing Raspbian PIXEL Desktop environment....
 mkdir /tmp/android ; cd /tmp/android
 sudo apt-get update
+
+# Fetch the gksu packages to replace PolicyKit
+# It won't work here; it needs systemd :(
 wget -q http://ftp.us.debian.org/debian/pool/main/libg/libgnome-keyring/libgnome-keyring-common_3.12.0-1_all.deb
 wget -q http://ftp.us.debian.org/debian/pool/main/libg/libgnome-keyring/libgnome-keyring0_3.12.0-1+b2_armhf.deb
 wget -q http://ftp.us.debian.org/debian/pool/main/g/gksu/gksu_2.0.2-9+b1_armhf.deb
 wget -q http://ftp.us.debian.org/debian/pool/main/libg/libgksu/libgksu2-0_2.0.13~pre1-9+b1_armhf.deb
 wget -q http://ftp.us.debian.org/debian/pool/main/libg/libgtop2/libgtop-2.0-10_2.34.2-1_armhf.deb
 wget -q http://ftp.us.debian.org/debian/pool/main/libg/libgtop2/libgtop-2.0-10_2.34.2-1_armhf.deb
+
+# Install minimal PIXEL Desktop GUI packages and gksu
 sudo apt-get -y install raspberrypi-ui-mods lxplug-menu lxinput lxterminal lxplug-cputemp lxplug-volumepulse libxfce4util7 libxfconf-0-3 libxfce4util-bin fonts-piboto pipanel rpd-wallpaper pishutdown scrot pixflat-icons lxsession-default-apps lxsession-edit gtk2-engines-pixflat gtk2-engines-clearlookspix gtk2-engines-pixbuf synaptic ./libgnome-keyring-common_3.12.0-1_all.deb ./libgnome-keyring0_3.12.0-1+b2_armhf.deb ./gksu_2.0.2-9+b1_armhf.deb ./libgksu2-0_2.0.13~pre1-9+b1_armhf.deb ./libgtop-2.0-10_2.34.2-1_armhf.deb --no-install-recommends
+
+# Cleanup GUI packages
+sudo apt-get clean
+
+# Comment out this line if you don't want Chromium
+sudo apt-get install -y rpi-chromium-mods
+
+# Cleanup Chromium packages
+sudo apt-get clean
+
+# Patch gksu over pkexec 
 sudo mv /usr/bin/lxpolkit /usr/bin/lxpolkit.android
 sudo mv /usr/bin/pkexec /usr/bin/pkexec.android
 sudo ln -s /usr/bin/gksudo /usr/bin/pkexec
-sudo apt-get clean
+
+# Configure gksu to use sudo
 mkdir -p $HOME/.gconf/apps/gksu
 touch $HOME/.gconf/apps/%gconf.xml
-tee $HOME/.gconf/apps/gksu/%gconf.xml > /dev/null <<EOF
-<?xml version="1.0"?>
-<gconf>
-	<entry name="force-grab" mtime="1600000000" type="bool" value="false"/>
-	<entry name="disable-grab" mtime="1600000000" type="bool" value="true"/>
-	<entry name="prompt" mtime="1600000000" type="bool" value="false"/>
-	<entry name="sudo-mode" mtime="1600000000" type="bool" value="true"/>
-	<entry name="save-to-keyring" mtime="1600000000" type="bool" value="true"/>
-	<entry name="display-no-pass-info" mtime="1600000000" type="bool" value="false"/>
-</gconf>
-EOF
+gconftool --type boolean --set /apps/gksu/sudo-mode "True"
+
+# We'll never use lightdm in a container so disable it
 sudo update-rc.d lightdm remove
+
+# Cleanup...
 cd / ; rm -rf /tmp/android

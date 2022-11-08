@@ -20,9 +20,9 @@ Pi-hole for Android is a Raspbian disk image tuned to work with the Pi-hole inst
 ### Installation:
 
 - Download and Install the latest [Pi Deploy APK](https://github.com/DesktopECHO/Pi-hole-for-Android/releases/latest/download/pideploy.apk)
-- Tap the main menu (**Three dots** at the top right of screen)
+- Tap the **Options** menu (Three dots **⋮** at top right of screen)
 - Tap **New Deployment**
-- In a few minutes, the [Raspbian Image](https://github.com/DesktopECHO/linuxdeploy-images/releases/latest/download/raspbian.tgz) will be downloaded and installed on your device.
+- After a few moments the [Raspbian Image](https://github.com/DesktopECHO/linuxdeploy-images/releases/latest/download/raspbian.tgz) will download and install to your device.
 - When deployment is complete, tap **[  ▷ START ]**  to launch the instance.
 - The instance will provide you with a password for Pi-hole admin, SSH and RDP access (Username: _android_, see screenshot below)
 - **Note**: The password appears only once when the image is deployed, make sure you record this information.

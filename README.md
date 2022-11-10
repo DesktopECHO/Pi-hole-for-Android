@@ -43,11 +43,11 @@ The Android device's IP is shown at the top of the Linux Deploy main window.  Yo
 
  - If your Android device has a display, you can RDP into the Pi-hole instance (as localhost) by installing the [Microsoft Remote Desktop](https://play.google.com/store/apps/details?id=com.microsoft.rdc.androidx) client.
 
-<img width="1586" alt="image" src="https://user-images.githubusercontent.com/33142753/200673465-dca797d6-04b3-4b39-bfd1-56c472c7cff7.png">
+<img width="1586" alt="image" src="https://user-images.githubusercontent.com/33142753/201135289-63c5844f-50bb-4ef0-961f-e25ea59ad747.png">
 
 <img width="1508" alt="image" src="https://user-images.githubusercontent.com/33142753/200677147-bd8230bb-39df-4aab-b4da-ef64e5d00f08.png">
 
-<img width="1364" alt="image" src="https://user-images.githubusercontent.com/33142753/200670602-647fa8d3-5750-4d21-8c0c-c059e011fe6f.png">
+<img width="1364" alt="image" src="http://user-images.githubusercontent.com/33142753/201134340-208e1cc2-73f5-45bc-bed4-6bca3cc7c3ef.png">
 
 **Additional Info:**
 

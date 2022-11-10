@@ -59,7 +59,7 @@ You can restart (or "bounce") the Pi-hole instance in Pi Deploy by pressing **[ 
 
 When a Pi-hole instance starts up, the default setting is to let it automagically configure networking.  If you change networks on the Android device simply restart the instance for Pi-hole to pick up the new settings.
 
-Alternatively, set a static assignment by commenting-out two lines in ```/etc/init.d/android-init``` (You will see which ones when you open the file in an editor.)  After the lines are commented out with a hash "#" you can manually add your IP, subnet and interface name to ```/etc/pihole/setupVars.conf```
+Alternatively, set a static assignment by commenting-out two lines in ```/etc/init.d/android-raspbian``` (You will see which ones when you open the file in an editor.)  After the lines are commented out with a hash "#" you can manually add your IP, subnet and interface name to ```/etc/pihole/setupVars.conf```
 
 Added latest release of [Unbound 1.17](https://www.nlnetlabs.nl/projects/unbound/about) to provide encrypted DNS by default; no addional configuration is necessary but you may customize to preference.
 

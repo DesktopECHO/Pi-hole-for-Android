@@ -49,11 +49,9 @@ The Android device's IP is shown at the top of the Linux Deploy main window.  Yo
 
 <img width="1364" alt="image" src="https://user-images.githubusercontent.com/33142753/200670602-647fa8d3-5750-4d21-8c0c-c059e011fe6f.png">
 
-**Pi-hole for Android wiki topics:**
-
-- [Pi/Linux Deploy - Trouble finding disk image or install location](https://github.com/DesktopECHO/Pi-hole-for-Android/wiki/Trouble-finding-path-where-Pi%E2%80%90hole-image-is-downloaded,-or-errors-are-reported-during-creation-of-Pi%E2%80%90hole-disk-image.)
-
 **Additional Info:**
+
+If you have a Samsung device, you will need to [De-Knox](https://www.google.com/search?q=de-knoxed+rom+site:forum.xda-developers.com) the stock ROM or flash a 3rd party ROM like LineageOS.  
 
 RDP Sessions launch the Openbox window manager with QTerminal in fullscreen mode.  To open a new tab hit **[Ctrl-Shift-T]** and to un-hide the menubar hit **[Ctrl-Shift-M]**
 

@@ -25,7 +25,7 @@ Pi-hole for Android is a Raspbian disk image tuned to work with the Pi-hole inst
 - After a few moments the [Raspbian Image](https://github.com/DesktopECHO/linuxdeploy-images/releases/latest/download/raspbian.tgz) will download and install to your device.
 - When deployment is complete, tap **[  ▷ START ]**  to launch the instance.
 - The instance will provide you with a password for Pi-hole admin, SSH and RDP access (Username: _android_, see screenshot below)
-- **Note**: The password appears only once when the image is deployed, make sure you record this information.
+- **Note**: The [xkcdpass](https://pypi.org/project/xkcdpass/) only appears once, be sure to record this info.
 - **Hint**:  The password text can be copy/pasted to other Android apps (like Remote Desktop) 
 - _(Optional, post-install)_ To install PIXEL Desktop run `pideploy-gui-install` and restart the instance.  Next time you login via RDP you will have a full desktop session with audio support.
 

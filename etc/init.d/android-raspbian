@@ -77,16 +77,12 @@ start)
         rm -f /usr/sbin/runlevel ; echo 'echo N 3' > /usr/sbin/runlevel ; chmod +x /usr/sbin/runlevel
         dpkg-divert --local --rename --add /sbin/initctl &>> /tmp/p4a.tmp
         ln -fs /bin/true /sbin/initctl
-        tee /usr/sbin/policy-rc.d > /dev/null <<EOF
-#!/bin/sh
-exit 0
-EOF
-tee /usr/bin/deb-systemd-helper > /dev/null <<EOF
-#!/bin/sh
-exit 101
-EOF
-echo 'exit 0' > /usr/sbin/policy-rc.d
-chmod +x /usr/sbin/policy-rc.d
+
+        echo 'exit 0' > /usr/sbin/policy-rc.d
+        chmod +x /usr/sbin/policy-rc.d
+        echo 'exit 0' > /usr/bin/deb-systemd-helper
+        chmod +x /usr/bin/deb-systemd-helper
+
         # Clean-up environment before startup
         rm -rf /bin/systemctl /bin/reboot /bin/poweroff /bin/service /var/lock/subsys/* /tmp/* /var/run/* /sbin/poweroff /sbin/reboot
         /bin/cp /.service    /sbin/service

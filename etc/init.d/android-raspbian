@@ -13,6 +13,7 @@ case "$1" in
 start)
         yes ' ' | sed 50q
         dbus-uuidgen --ensure
+        echo 2 | tee /proc/sys/abi/cp15_barrier
         # Allow daemons to listen on network
         sed -i "/aid_inet/c\aid_inet:x:3003:android,root,messagebus,pihole,unbound,xrdp,sshd,avahi,postfix,postdrop,redis,www-data,ncp,prometheus,sambashare,mysql" /etc/group
         # Force time sync to help devices without RTC
@@ -21,6 +22,8 @@ start)
         subnetmask=$(ip route list table main | tail -n1) ; subnetmask=$(cut -d "/" -f2 <<< "$subnetmask") ; subnetmask=$(cut -d " " -f1 <<< "$subnetmask")
         device=$(ip route list table main | tail -n1 | cut -d' ' -f 3)
         ipaddr=$(ip route list table main | tail -n1) ; ipaddr=`echo $ipaddr | awk -F' ' ' { print $(NF-0) } '`
+        gateway=$(ip -4 route show table 0 | grep 'default via' | cut -d' ' -f 3)
+        route add default gw $gateway dev $device
         # Derive hostname from device name (or set to your preference)
         hostname=$(unchroot getprop ro.product.device) # 'Or' # hostname="Raspbian"
         hstnm=$(echo $hostname | sed -e 's/ /-/g' |  sed -e 's/_/-/g'| sed -e 's/--//g')

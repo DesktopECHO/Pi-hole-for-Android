@@ -3,8 +3,8 @@ service pihole-FTL stop
 service unbound    stop
 service lighttpd   stop
 service xrdp       stop
-service crond      stop
-service syslog-ng  stop
+service cron       stop
+service inetutils-syslogd  stop
 bash -c "unchroot am start -a com.android.internal.intent.action.REQUEST_SHUTDOWN"  > /dev/null 2>&1
 bash -c "unchroot am start -n android/com.android.internal.app.ShutdownActivity"    > /dev/null 2>&1
 sleep 3

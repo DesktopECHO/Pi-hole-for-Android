@@ -21,8 +21,8 @@ Pi-hole for Android is a CentOS disk image for [Linux Deploy](https://play.googl
   - Get the latest version at: **https://github.com/meefik/linuxdeploy/releases**
   - Android 4.x requires an older release: **https://github.com/meefik/linuxdeploy/releases/tag/2.5.1**
 
--  Download the latest Pi-hole for Android disk image: 
-   - **[Release v1.7 - October 5, 2022](https://github.com/DesktopECHO/Pi-hole-for-Android/releases/download/v1.7/p4a17.tgz)**
+-  Download the latest Pi-hole for Android 4.x disk image: 
+   - **[Release v1.7b - August 23, 2023](https://github.com/DesktopECHO/Pi-hole-for-Android/releases/download/v1.7/p4a17b.tgz)**
 
 - Open **Linux Deploy** and change ONLY these settings:
      -  Open the 'Hamburger menu' (Symbol with three dashes at top left of screen) then touch **Settings**.  Place a checkmark on these options:

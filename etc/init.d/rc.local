@@ -1,0 +1,56 @@
+#! /bin/sh
+### BEGIN INIT INFO
+# Provides:          rc.local
+# Required-Start:    $syslog cron xrdp pihole-FTL avahi-daemon android-raspbian
+# Required-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:
+# Short-Description: Run /etc/rc.local if it exist
+### END INIT INFO
+
+PATH=/usr/sbin:/usr/bin:/sbin:/bin
+
+. /lib/init/vars.sh
+. /lib/lsb/init-functions
+
+do_start() {
+	if [ -x /etc/rc.local ]; then
+	        [ "$VERBOSE" != no ] && log_begin_msg "Running local boot scripts (/etc/rc.local)"
+		/etc/rc.local
+		ES=$?
+		[ "$VERBOSE" != no ] && log_end_msg $ES
+		return $ES
+	fi
+}
+
+do_stop() {
+	if [ -x /etc/rc.shutdown ]; then
+	        [ "$VERBOSE" != no ] && log_begin_msg "Running local shutdown scripts (/etc/rc.shutdown)"
+		/etc/rc.shutdown
+		ES=$?
+		[ "$VERBOSE" != no ] && log_end_msg $ES
+		return $ES
+	fi
+}
+
+case "$1" in
+    start)
+	do_start
+        ;;
+    restart|reload|force-reload)
+        echo "Error: argument '$1' not supported" >&2
+        exit 3
+        ;;
+    status)
+        # No-op
+        exit 0
+        ;;
+    stop)
+	do_stop
+        exit 0
+        ;;
+    *)
+        echo "Usage: $0 start|stop" >&2
+        exit 3
+        ;;
+esac

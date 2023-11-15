@@ -1,0 +1,23 @@
+#!/bin/bash
+#
+# Nextcloudpi Installer for Pi Deploy
+#
+
+clear
+RDY=$(id -Gn root |grep -c aid_inet)
+[ $RDY -eq 0 ] && sudo usermod -a -G aid_net_bt,aid_net_bt_admin,aid_net_admin,aid_net_raw,aid_inet root && echo && read -p "Changes made to group membership, restart this Pi Deploy instance and re-run the install script." && exit 0
+echo
+echo "Nextcloudpi Installer for Pi Deploy."
+echo "NOTE: Pihole-FTL will be relocated to port 8080" ; echo
+read -p "Hit [Enter] to continue, [CTRL-C] to quit. "
+echo ; echo Please wait...
+
+# Get MariaDB up and running
+
+sudo bash -c "echo exit 0 > /etc/init.d/mariadb ; chmod +x  /etc/init.d/mariadb ; apt-get update"
+sudo apt-get -qy --option Dpkg::Options::=--force-confold install mariadb-server
+sudo cp /.mariadb /etc/init.d/mariadb
+sudo cp /.mariadb.service /usr/lib/systemd/system/mariadb.service
+sudo /usr/bin/install -m 755 -o mysql -g root -d /var/run/mysqld
+sudo systemctl start mariadb
+sudo /opt/nextcloudpi/install.sh

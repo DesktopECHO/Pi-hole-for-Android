@@ -1,7 +1,10 @@
 #!/bin/bash
+clear
+clear ; echo ; echo "CAUTION: The image configuration will be RESET!"
+read -p "Hit [Enter] to continue, [CTRL-C] to quit. "
+echo ; echo Preparing system image...
 systemctl stop lighttpd
 systemctl stop pihole-FTL
-systemctl stop unbound
 systemctl stop dbus
 systemctl stop inetutils-syslogd
 systemctl stop ssh
@@ -12,11 +15,9 @@ killall -9 lighttpd
 killall -9 dbus
 killall -9 unbound
 dpkg --purge unbound
-mv /usr/bin/uname-shim /usr/bin/uname
+rm -rf /etc/pihole/pihole-FTL.db
 rm -rf /etc/ssl/private/ssl-cert-snakeoil.key
 rm -rf /etc/ssl/certs/ssl-cert-snakeoil.pem
-rm /etc/pihole/pihole-FTL.db
-rm -rf /var/lib/apt/*
 rm -rf /home/android/.bash_history
 rm -rf /home/android/.xorg*
 rm -rf /root/.bash_history
@@ -40,18 +41,20 @@ rm -rf /var/log/lighttpd/*.log
 rm -rf /var/log/messages
 rm -rf /var/log/syslog
 rm -rf /var/lib/dbus/machine-id
-rm -f /run/*
+rm -f /run/* > /dev/null 2>&1
 rm -f /run/xrdp/*
 rm -f /run/pihole/*
 rm -f /run/sshd/*
 rm -f /run/dbus/*
 rm -rf /var/cache/apt/*
 rm -rf /var/lib/apt/*
+rm -rf /var/swap
 rm -rf /etc/ssh/ssh_host_*
 touch /var/log/xrdp ; touch /var/log/xrdp.log ; touch /var/log/xrdp-sesman.log  ; chown root:xrdp /var/log/xrdp* ; chmod 660 /var/log/xrd*
 echo "127.0.0.1  localhost"                  >  /etc/hosts
 echo "::1        ip6-localhost ip6-loopback" >> /etc/hosts
 cd /home/android ; rm -rf .cache .pcsc* .ssh .vnc .rnd .pki .local .Xauthority .xsession* PADD.pid piHoleVersion thinclient_drives /tmp/* /tmp/.*
 rm -rf /etc/unbound/*.key /etc/unbound/*.pem /etc/unbound/unbound.conf.d/pihole.conf
+echo
 read -p "Turn off this instance and run image backup or hit [Enter] to exit"
 exit

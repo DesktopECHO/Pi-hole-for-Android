@@ -3,19 +3,26 @@
 # Raspbian GUI Installer for Pi Deploy
 #
 
-clear ; read -p "Hit [Enter] to install Raspbian PIXEL Desktop environment, CTRL-C to exit "
-mkdir /tmp/android ; cd /tmp/android
+clear ; echo ; echo "PIXEL Desktop installer for Pi Deploy." ; echo
+read -p "Hit [Enter] to continue, [CTRL-C] to quit. "
+rm -rf /tmp/android ; mkdir /tmp/android ; cd /tmp/android
 sudo apt-get update
 
-# Fetch the gksu packages to replace PolicyKit
-# It won't work here; it needs systemd :(
-wget -q https://old.kali.org/kali/pool/main/libg/libgnome-keyring/libgnome-keyring0_3.12.0-1%2Bb2_armhf.deb
+# Policykit needs systemd to run, replace it with gksu
+ARCH=$(dpkg --print-architecture) ; [[ "$ARCH" = "arm64" ]] || ARCH=armhf
+wget -q https://old.kali.org/kali/pool/main/libg/libgnome-keyring/libgnome-keyring0_3.12.0-1%2Bb2_$ARCH.deb
 wget -q https://old.kali.org/kali/pool/main/libg/libgnome-keyring/libgnome-keyring-common_3.12.0-1_all.deb
-wget -q https://old.kali.org/kali/pool/main/g/gksu/gksu_2.0.2-9%2Bb1_armhf.deb
-wget -q https://old.kali.org/kali/pool/main/libg/libgksu/libgksu2-0_2.0.13~pre1-9%2Bb2_armhf.deb
+wget -q https://old.kali.org/kali/pool/main/g/gksu/gksu_2.0.2-9%2Bb1_$ARCH.deb
+wget -q https://old.kali.org/kali/pool/main/libg/libgksu/libgksu2-0_2.0.13~pre1-9%2Bb2_$ARCH.deb
+
+# Install systemd as a placeholder, replace systemctl with a version for containers
+sudo apt-get -y install systemd --no-install-recommends
+sudo /bin/cp /.systemctl /usr/bin/systemctl
 
 # Install minimal PIXEL Desktop GUI packages and gksu
-sudo apt-get -y install raspberrypi-ui-mods lxplug-menu lxinput lxterminal lxplug-cputemp lxplug-volumepulse libxfce4util7 libxfconf-0-3 libxfce4util-bin fonts-piboto pipanel rpd-wallpaper pishutdown scrot pixflat-icons lxsession-default-apps lxsession-edit gtk2-engines-pixflat gtk2-engines-clearlookspix gtk2-engines-pixbuf mousepad synaptic ./libgnome-keyring-common_*.deb ./libgnome-keyring0_*.deb ./gksu_*.deb ./libgksu2-*.deb --no-install-recommends
+sudo apt-get -y install raspberrypi-ui-mods lxplug-menu lxinput lxterminal lxplug-cputemp lxplug-volumepulse pulseaudio pavucontrol libxfce4util7 libxfconf-0-3 libxfce4util-bin fonts-piboto pipanel rpd-wallpaper pishutdown scrot pixflat-icons lxsession-default-apps lxsession-edit gtk2-engines-pixflat gtk2-engines-clearlookspix gtk2-engines-pixbuf mousepad synaptic neofetch ./*.deb --no-install-recommends
+sudo apt-get -y install geany lxtask xarchiver galculator dmz-cursor-theme
+sudo update-alternatives --set x-cursor-theme /usr/share/icons/DMZ-White/cursor.theme
 
 # Cleanup GUI packages
 sudo apt-get clean
@@ -26,7 +33,7 @@ sudo apt-get install -y rpi-chromium-mods
 # Cleanup Chromium packages
 sudo apt-get clean
 
-# Patch gksu over pkexec 
+# Patch gksu over pkexec
 sudo mv /usr/bin/lxpolkit /usr/bin/lxpolkit.android
 sudo mv /usr/bin/pkexec /usr/bin/pkexec.android
 sudo ln -s /usr/bin/gksudo /usr/bin/pkexec
@@ -34,7 +41,10 @@ sudo ln -s /usr/bin/gksudo /usr/bin/pkexec
 # Configure gksu to use sudo
 mkdir -p $HOME/.gconf/apps/gksu
 touch $HOME/.gconf/apps/%gconf.xml
-gconftool --type boolean --set /apps/gksu/sudo-mode "True"
+gconftool --type boolean --set /apps/gksu/sudo-mode "true"
+gconftool --type boolean --set /apps/gksu/disable-grab "true"
+gconftool --type boolean --set /apps/gksu/prompt "false"
+gconftool --type boolean --set /apps/gksu/force-grab "false"
 
 # We'll never use lightdm in a container so disable it
 sudo update-rc.d lightdm remove
@@ -47,3 +57,4 @@ echo "fontname=Cascadia Code 14" >> ~/.config/lxterminal/lxterminal.conf
 
 # Cleanup...
 cd / ; rm -rf /tmp/android
+echo ; echo "PIXEL Desktop install finished!"

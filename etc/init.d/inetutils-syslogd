@@ -1,0 +1,85 @@
+#! /bin/sh
+### BEGIN INIT INFO
+# Provides:          inetutils-syslogd
+# Required-Start:    $network $remote_fs $time
+# Required-Stop:     $network $remote_fs $time
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: GNU Network Utilities syslog daemon
+# Description:       GNU Network Utilities syslog daemon
+### END INIT INFO
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+DAEMON=/usr/sbin/syslogd
+NAME=syslogd
+CONFIGFILE=/etc/default/inetutils-syslogd
+PIDFILE=/run/syslog.pid
+DESC=""
+
+test -x $DAEMON || exit 0
+
+set -e
+
+. /lib/lsb/init-functions
+
+test -r $CONFIGFILE && . $CONFIGFILE
+
+# Create a xconsole pipe if it does not exist.
+# Don't create it if Linux's devfs is used, and symlink it on kFreeBSD as it
+# does not allow pipes on /dev.
+
+case `uname -s` in
+*FreeBSD)
+  XCONSOLE=/run/xconsole
+  rm -f /dev/xconsole
+  ln -sf $XCONSOLE /dev/xconsole
+  ;;
+*)
+  XCONSOLE=/dev/xconsole
+  ;;
+esac
+
+if [ ! -c /dev/.devfsd ]; then
+  if [ ! -p $XCONSOLE ]; then
+    rm -f $XCONSOLE
+    mkfifo -m 0640 $XCONSOLE
+  fi
+fi
+
+set +e
+
+case "$1" in
+start)
+  log_daemon_msg "Starting Sysem Log"
+  start-stop-daemon --start --quiet --oknodo --pidfile $PIDFILE \
+                    --exec $DAEMON -- $SYSLOGD_OPTS
+  log_end_msg $?
+  ;;
+stop)
+  log_daemon_msg "Stopping System Log"
+  start-stop-daemon --stop --quiet --oknodo --pidfile $PIDFILE \
+                    --exec $DAEMON --retry 5
+  log_end_msg $?
+  ;;
+reload|force-reload)
+  log_action_begin_msg "Reloading $DESC configuration files"
+  start-stop-daemon --stop --signal 1 --quiet --pidfile $PIDFILE \
+                   --exec $DAEMON
+  log_action_end_msg $?
+  ;;
+restart)
+  log_action_msg "Restarting $DESC" "$NAME"
+  $0 stop
+  $0 start
+  ;;
+status)
+  status_of_proc $DAEMON $NAME
+  ;;
+*)
+  N=/etc/init.d/inetutils-$NAME
+  echo "Usage: $N {start|stop|restart|reload|force-reload|status}" >&2
+  exit 1
+  ;;
+esac
+
+exit 0

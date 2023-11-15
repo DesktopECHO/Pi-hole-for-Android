@@ -1,0 +1,122 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          lighttpd
+# Required-Start:    $local_fs $remote_fs $network $syslog
+# Required-Stop:     $local_fs $remote_fs $network $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start the lighttpd web server.
+# Description:       Fast and smalle webserver with minimal memory footprint
+#                    developed with security in mind HTTP/1.1 compliant caching
+#                    proxy server.
+### END INIT INFO
+
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+DAEMON=/usr/sbin/lighttpd
+NAME=lighttpd
+DESC="web server"
+PIDFILE=/run/$NAME.pid
+SCRIPTNAME=/etc/init.d/$NAME
+
+DAEMON_OPTS="-f /etc/lighttpd/lighttpd.conf"
+
+test -x $DAEMON || exit 0
+
+set -e
+
+check_syntax()
+{
+    $DAEMON -tt $DAEMON_OPTS > /dev/null || exit $?
+}
+
+if [ "$1" != status ]; then
+    # be sure there is a /run/lighttpd, even with tmpfs
+    # The directory is defined as volatile and may thus be non-existing
+    # after a boot (DPM §9.3.2)
+    owner=www-data
+    group=www-data
+    [ -d /var/cache/lighttpd ] || \
+        install -d -o $owner -g $group -m 0750 "/var/cache/lighttpd"
+    [ -d /var/cache/lighttpd/compress ] || \
+        install -d -o $owner -g $group -m 0750 "/var/cache/lighttpd/compress"
+    [ -d /var/cache/lighttpd/uploads ] || \
+        install -d -o $owner -g $group -m 0750 "/var/cache/lighttpd/uploads"
+    [ -d /var/log/lighttpd ] || \
+        install -d -o $owner -g $group -m 0750 "/var/log/lighttpd"
+    [ -d /run/lighttpd ] || \
+        install -d -o $owner -g $group -m 0750 "/run/lighttpd"
+fi
+
+. /lib/lsb/init-functions
+
+case "$1" in
+    start)
+        check_syntax
+        log_daemon_msg "Starting $DESC" $NAME
+        if ! start-stop-daemon --start --oknodo --quiet \
+            --pidfile $PIDFILE --exec $DAEMON -- $DAEMON_OPTS
+        then
+            log_end_msg 1
+        else
+            log_end_msg 0
+        fi
+        ;;
+    stop)
+        log_daemon_msg "Stopping $DESC" $NAME
+        if start-stop-daemon --stop --retry 30 --oknodo --quiet \
+            --pidfile $PIDFILE --exec $DAEMON
+        then
+            rm -f $PIDFILE
+            log_end_msg 0
+        else
+            log_end_msg 1
+        fi
+        ;;
+    reload|force-reload)
+        check_syntax
+        log_daemon_msg "Reloading $DESC configuration" $NAME
+        if start-stop-daemon --stop --signal INT --quiet \
+            --pidfile $PIDFILE --exec $DAEMON \
+            --retry=TERM/60/KILL/5
+        then
+            rm $PIDFILE
+            if start-stop-daemon --start --quiet  \
+                --pidfile $PIDFILE --exec $DAEMON -- $DAEMON_OPTS ; then
+                log_end_msg 0
+            else
+                log_end_msg 1
+            fi
+        else
+            log_end_msg 1
+        fi
+        ;;
+    reopen-logs)
+        pidofproc -p "$PIDFILE" "$DAEMON" >/dev/null 2>&1 || exit 0
+        log_daemon_msg "Reopening $DESC logs" $NAME
+        if start-stop-daemon --stop --signal HUP --oknodo --quiet \
+            --pidfile $PIDFILE --exec $DAEMON
+        then
+            log_end_msg 0
+        else
+            log_end_msg 1
+        fi
+        ;;
+    restart)
+        check_syntax
+        $0 stop
+        $0 start
+        ;;
+    configtest|testconfig)
+        check_syntax
+        ;;
+    status)
+        status_of_proc -p "$PIDFILE" "$DAEMON" lighttpd && exit 0 || exit $?
+        ;;
+    *)
+        echo "Usage: $SCRIPTNAME {start|stop|restart|reload|force-reload|reopen-logs|configtest|status}" >&2
+        exit 1
+        ;;
+esac
+
+exit 0

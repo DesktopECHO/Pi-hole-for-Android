@@ -21,7 +21,7 @@ echo '                                              '
    if [ -f /var/tmp/p4a ] ; then
       P4A=`cat /var/tmp/p4a`
       rm /var/tmp/p4a
-      echo
+      echo " "
       echo " IMPORTANT: RDP/SSH/Pi-hole admin password is"
       echo "            shown below only ONCE, record it!"
       echo " "

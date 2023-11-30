@@ -1,562 +1,217 @@
 #!/bin/sh
-# Filename: systemctl
-# Location: /usr/sbin/systemctl
-#    /usr/bin/hostnamectl
-#    /usr/bin/systemd-detect-virt
-# Author: bgstack15@gmail.com
-# Startdate: 2020-01-10 13:02:14
-# SPDX-License-Identifier: CC-BY-SA-4.0
-# Title: 
-# Purpose: 
-# Package: systemctl-service-shim
-# History: 
-#    2020-05-14 place framework.sh contents inline so as not to depend on it.
-#    2021-01-10 adapted for inclusion in devuan-sanity
-#    2021-10-20 add /bin/systemctl symlink control logic
-#    2022-07-12 Convert try-restart to restart
-#    2022-07-14 Add preset, which runs update-rc.d ${service} defaults
-#    2023-02-11 Add /usr/bin/systemctl symlink control
-# Usage: 
-#    Should be mostly like systemctl from systemd.
-# Reference: ftemplate.sh 2019-05-02a ; framework.sh 2018-05-02a
-#    man 1 systemctl
-# Improve:
-#    Return 1 if status output is failed
-# Dependencies:
-#    req-devuan: moreutils
-# Documentation:
-#    Be aware that real systemd systemctl is file /bin/systemctl but
-#    this systemdtl is file /usr/sbin/systemctl to prevent a recursive loop
-#    in some service scripts that look for /bin/systemctl
-# vim: set sw=3 sts=3 ts=3 et:
-fiversion="2019-05-02a"
-systemctlversion="2023-02-11a"
 
-usage() {
-   ${PAGER:-/usr/bin/less -F} >&2 <<ENDUSAGE
-usage: systemctl [-duV] [-c conffile]
-Provides a systemctl-like interface to sysvinit. Simulates various
-actions on services: start, stop, restart, enable, disable, status,
-mask, unmask, is-enabled, is-active, condrestart.
-version ${systemctlversion}
- -d debug   Show debugging info, including parsed variables.
- -u usage   Show this usage block.
- -V version Show script version number.
- -c conf    Read in this config file.
-Return values:
- 0 Normal
- 1 Queried service is disabled/inactive
- 2 Count or type of flaglessvals is incorrect
- 3 Incorrect OS type
- 4 Unable to find dependency
- 5 Not run as root or sudo
-ENDUSAGE
+###########################################################################
+# /usr/bin/service
+#
+# A convenient wrapper for the /etc/init.d init scripts.
+#
+# This script is a modified version of the /sbin/service utility found on
+# Red Hat/Fedora systems (licensed GPLv2+).
+#
+# Copyright (C) 2006 Red Hat, Inc. All rights reserved.
+# Copyright (C) 2008 Canonical Ltd.
+#   * August 2008 - Dustin Kirkland <kirkland@canonical.com>
+# Copyright (C) 2013 Michael Stapelberg <stapelberg@debian.org>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+# On Debian GNU/Linux systems, the complete text of the GNU General
+# Public License can be found in `/usr/share/common-licenses/GPL-2'.
+###########################################################################
+
+
+is_ignored_file() {
+	case "$1" in
+		skeleton | README | *.dpkg-dist | *.dpkg-old | rc | rcS | single | reboot | bootclean.sh)
+			return 0
+		;;
+	esac
+	return 1
 }
 
-# DEFINE FUNCTIONS
-log_to_file() {
-   flecho "${@}" >> "${logfile}"
-}
+VERSION="`basename $0` ver. 1.65.2"
+USAGE="Usage: `basename $0` < option > | --status-all | \
+[ service_name [ command | --full-restart ] ]"
+SERVICE=
+ACTION=
+SERVICEDIR="/etc/init.d"
+OPTIONS=
+is_systemd=
 
-parseFlag() {
-   flag="$1"
-   hasval=0
-   case ${flag} in
-      # INSERT FLAGS HERE
-      "d" | "debug" | "DEBUG" | "dd" ) setdebug ; ferror "debug level ${debug}" ; __debug_set_by_param=1 ;;
-      "u" | "usage" | "help" | "h" ) usage ; exit 0 ;;
-      "V" | "fcheck" | "version" ) ferror "${scriptfile} version ${systemctlversion}" ; exit 0 ;;
-      "c" | "conf" | "conffile" | "config" ) getval ; conffile="${tempval}" ;;
-      "now" ) export SYSTEMCTL_NOW=1 ;;
-      "full") export SYSTEMCTL_FULL=1 ;;
-      "system") export SYSTEMCTL_SYSTEM=1 ;;
-   esac
 
-   debuglev 10 && { test ${hasval} -eq 1 && ferror "flag: ${flag} = ${tempval}" || ferror "flag: ${flag}" ; }
-}
-
-# INITIALIZE VARIABLES
-# variables set in framework:
-# server scriptdir scriptfile scripttrim
-
-### BEGIN IMPORT OF FRAMEWORK.SH
-fversion="2020-04-24x"
-
-# DEFINE FUNCTIONS
-
-isflag() {
-   # input: $1=word to parse
-   case "$1" in
-      --*) retval=2 ;;
-      -*) retval=1 ;;
-      *) retval=0 ;;
-   esac
-   echo $retval
-}
-
-parseParam() {
-   # determines if --longname or -shortflagS that need individual parsing
-   trimParam=$( printf '%s' "${param}" | sed -n 's/--//p' )
-   _rest=
-   if test -n "$trimParam" ;
-   then
-      parseFlag $trimParam
-   else
-      #splitShortStrings
-      _i=2
-      while test ${_i} -le ${#param} ;
-      do
-         _j=$( expr ${_i} + 1)
-         #_char=$(expr substr "$param" $_i 1)
-         #_rest=$(expr substr "$param" $_j 255)
-         _char=$( printf '%s' "${param}" | cut -c ${_i})
-         _rest=$( printf '%s' "${param}" | cut -c ${_j}-255)
-         parseFlag $_char
-         _i=$( expr ${_i} + 1)
-      done
-   fi
-}
-
-getval() {
-   tempval=
-   if test -n "${_rest}" ;
-   then
-      tempval="${_rest}"
-      hasval=1
-      _i=255   # skip rest of splitShortStrings because found the value!
-   elif test -n "$nextparam" && test $(isflag "$nextparam") -eq 0 ;
-   then
-      tempval="$nextparam"
-      hasval=1 #DNE ; is affected by ftemplate!
-      paramnum=$nextparamnum
-   fi
-}
-
-debuglev() {
-   # call: debuglev 5 && ferror "debug level is at least a five!"
-   # added 2015-11-17
-   localdebug=0 ; localcheck=0 ;
-   fisnum ${debug} && localdebug=${debug}
-   fisnum ${1} && localcheck=${1}
-   test $localdebug -ge $localcheck && return 0 || return 1
-}
-
-debuglevoutput() {
-   # call: commandthatgeneratesstdout | debuglevoutput 8
-   # output: output to standard error prepended with "debug8: " the contents of the pipe
-   ___dlo_threshold="${1}"
-   ___dlo_silent="${2}"
-   if debuglev "${___dlo_threshold}" ;
-   then
-      if test -n "${___dlo_silent}" ;
-      then
-         cat 1>&2
-      else
-         sed -r -e "s/^/debug${___dlo_threshold}: /;" 1>&2
-      fi
-   else
-      cat 1>/dev/null 2>&1
-   fi
-}
-
-fisnum() {
-   # call: fisnum $1 && debug=$1 || debug=10
-   fisnum= ;
-   case $1 in
-      ''|*[!0-9]*) fisnum=1 ;; # invalid
-      *) fisnum=0 ;; # valid number
-   esac
-   return ${fisnum}
-}
-
-fistruthy() {
-   # call: if fistruthy "$val" ; then
-   local _return=
-   case "$( echo "${1}" | tr '[:upper:]' '[:lower:]' )" in
-      yes|1|y|true|always) _return=true ;;
-   esac
-   test -n "${_return}" ; return $?
-}
-
-setval() {
-   # call: setval 0 value1 value2 value3 ... <<EOFOPTIONS
-   # /bin/foo1 --optforfoo1
-   # /usr/bin/foo2 --optforfoo2
-   # EOFOPTIONS
-   #              ^ 0 = soft fail, 1 = critical-fail
-   quitonfail="${1}" ; shift
-   _vars="${@}"
-   #echo "_vars=${_vars}"
-   _varcount=0
-   for _word in ${_vars} ; do _varcount=$( expr $_varcount + 1 ) ; eval "_var${_varcount}=${_word}" ; done
-   _usethis=0
-   while read line ;
-   do
-      _varcount=0
-      if test ! "${_usethis}x" = "0x" ; then break ; fi
-      #echo "line=${line}" ;
-      for _word in ${line} ;
-      do
-         _varcount=$( expr $_varcount + 1 )
-         #echo "word ${_varcount}=${_word}" ;
-         case "${_varcount}" in
-            1)
-               #echo "Testing for existence of file ${_word}"
-               if test -f "${_word}" ;
-               then
-                  _usethis=1
-                  #echo "${_var1}=${_word}"
-                  eval "${_var1}=${_word}"
-               fi
-               ;;
-            *)
-               #echo "just an option: ${_word}"
-               if test "${_usethis}x" = "1x" ;
-               then
-                  #eval echo "\${_var${_varcount}}=${_word}"
-                  eval eval "\${_var${_varcount}}=${_word}"
-               fi
-               ;;
-         esac
-      done
-   done
-   #eval echo "testfile=\$${_var1}"
-   eval _testfile=\$${_var1}
-   if test ! -f "${_testfile}" ;
-   then
-      case "${quitonfail}" in 1) _failval="critical-fail" ;; *) _failval="fail" ;; esac
-      eval "${_var1}=${_failval}"
-      setvalout=${_failval}
-   else
-      eval setvalout="valid-${_var1}"
-   fi
-}
-
-flecho() {
-   # requires moreutils
-   if echo "${@}" | grep -qiE '.' ;
-   then
-      printf "%s\n" "${@}" | TZ=UTC ts "[%FT%TZ]${USER}@${server}:"
-   else
-      printf '' | TZ=UTC ts "[%FT%TZ]${USER}@${server}"
-   fi
-}
-
-ferror() {
-   # call: ferror "$scriptfile: 2. Something bad happened-- error message 2."
-   echo "$@" 1>&2
-}
-
-setdebug() {
-   # call: setdebug
-   debug=10
-   getval
-   if test $hasval -eq 1 ;
-   then
-      if fisnum ${tempval} ;
-      then
-         debug=${tempval}
-      else
-         #test paramnum -le paramcount && paramnum=$( expr ${paramnum} - 1 )
-         hasval=0
-      fi
-   elif fisnum ${_rest} ;
-   then
-      debug=${_rest}
-      _i=255
-   else
-      test $paramnum -le $paramcount && test -z ${nextparam} && paramnum=$( expr ${paramnum} - 1 )
-   fi
-}
-
-define_if_new() {
-   # call: define_if_new IFW_IN_LOG_FILE "/var/log/messages"
-   eval thisval="\${${1}}"
-   test -z "${thisval}" && eval "$1"=\"$2\"
-}
-
-# INITIALIZE VARIABLES
-server=$( hostname -s )
-thisos="$( uname -s )"
-# get thisflavor and thisflavorversion. Examples: centos, ubuntu, redhat
-if test -f /etc/os-release ;
-then
-   eval thisflavor=$( grep -iE "^\s*ID=" /etc/os-release 2>/dev/null | sed 's/^.*=//;' | tr 'A-Z' 'a-z' )
-   eval thisflavorversion=$( grep -iE "^\s*PRETTY_NAME=" /etc/os-release 2>/dev/null | sed -e 's/^.*=//;' | tr -dc '0-9.' )
-elif test -f /etc/system-release && test $( wc -l < /etc/system-release 2>/dev/null ) -eq 1 ;
-then
-   eval thisflavor=$( awk '{print $1}' < /etc/system-release 2>/dev/null | tr 'A-Z' 'a-z' )
-   eval thisflavorversion=$( </etc/system-release sed -e 's/^.*=//;' 2>/dev/null | tr -dc '0-9.' )
-else
-   if test "${thisos}" = "FreeBSD" ; then
-      thisflavor="$( uname -i )" ; thisflavorversion="$( uname -r )" ;
-   else
-      thisflavor="other"
-      thisflavorversion="unknown"
-   fi
+if [ $# -eq 0 ]; then
+   echo "${USAGE}" >&2
+   exit 1
 fi
-case "${thisos}" in FreeBSD) sed=gsed ;; *) sed=sed ;; esac
 
-# if framework is dot sourced then $0 will be "-bash" and screw things up
-case ${0} in
-   "-bash")
-      scriptdir="$( pwd )"
-      scriptfile="dot-sourced" ;;
-   *)
-      scriptdir="$( cd $( dirname ${0} ) ; pwd )"
-      scriptfile="$( basename ${0} | sed 's!/./!/!g;s!\./!!g' )"
-      scripttrim="${scriptfile%%.sh}"
-      ;;
-esac
+if [ -d /run/systemd/system ]; then
+   is_systemd=1
+fi
 
-# SPECIAL RUNTIME-RELATED VARIABLES
-{ test "$USER" = "root" || test "$( stat -c '%u' /proc/$$/exe 2>/dev/null )" = 0 ; } && is_root=1
-test -n "$SUDO_USER" && is_root="sudo"
-
-nullflagcount=0
-validateparams() {
-   # VALIDATE PARAMETERS
-   # scroll through all parameters and check for isflag.
-   # if isflag, get all flags listed. Also grab param#.
-   paramcount=$#
-   thiscount=0 ;thisopt=0 ;freeopt=0 ;
-   varsyet=0
-   paramnum=0
-   debug=0
-   fallopts=
-   while test $paramnum -lt $paramcount ;
-   do
-      paramnum=$( expr ${paramnum} + 1 )
-      eval param=\${$paramnum}
-      nextparamnum=$( expr ${paramnum} + 1 )
-      eval nextparam=\${$nextparamnum}
-      case $param in
-         "-")
-            if test "$varsyet" = "0" ;
-            then
-               # first instance marks beginning of flags and parameters.
-               #Until then it was the names of variables to fill.
-               varsyet=1
-            else
-               nullflagcount=$( expr ${nullflagcount} + 1 ) #useful for separating flags from something else?
-               debuglev 10 && ferror "null flag!" # second instance is null flag.
-            fi
-            ;;
-      esac
-      if test -n "$param" ;
-      then
-         # parameter $param exists.
-         if test $(isflag $param) -gt 0 ;
-         then
-            # IS FLAG
-            parseParam
-         else
-            # IS VALUE
-            if test "$varsyet" = "0" ;
-            then
-               thisopt=$( expr ${thisopt} + 1 )
-               test "${param}" = "DEBUG" && debug=10 && thisopt=$( expr ${thisopt} - 1 ) || \
-                  eval "varname${thisopt}=${param}"
-                  #varname[${thisopt}]="${param}"
-               debuglev 10 && ferror "var \"${param}\" named"
-            else
-               thiscount=$( expr ${thiscount} + 1 )
-               test $thiscount -gt $thisopt && freeopt=$( expr ${freeopt} + 1 )
-               #eval ${varname[${thiscount}]:-opt${freeopt}}="\"${param}\""
-               eval "thisvarname=\${varname${thiscount}}"
-                  test -z "${thisvarname}" && eval "thisvarname=opt${freeopt}"
-               eval "${thisvarname}=\"${param}\""
-               eval fallopts=\"${fallopts} ${param}\"
-               debuglev 10 && ferror "${thisvarname} value: ${param}"
-            fi
-         fi
-      fi
-   done
-   fallopts="${fallopts# }"
-   if debuglev 10 ;
-   then
-      ferror "thiscount=$thiscount"
-      ferror "fallopts=$fallopts"
-      ferror "Framework $fversion"
-      ferror "Finput $fiversion"
-   fi
-}
-### END IMPORT OF FRAMEWORK.SH
-
-define_if_new logfile "/var/log/systemctl.log"
-
-# VALIDATE PARAMETERS
-# objects before the dash are options, which get filled with the optvals
-# to debug flags, use option DEBUG. Variables set in framework: fallopts
-validateparams action - "$@"
-
-# LEARN EX_DEBUG
-test -z "${__debug_set_by_param}" && fisnum "${SYSTEMCTL_DEBUG}" && debug="${SYSTEMCTL_DEBUG}"
-debug=10
-
-# CONFIGURE VARIABLES AFTER PARAMETERS
-
-_trimmed="$( echo "${@}" | tr -d '\r\n' )"
-log_to_file "${0} ${_trimmed}"
-case "${0}" in
-   *hostnamectl|*systemd-detect-virt) exit 0 ;; # always just short-circuit
-esac
-
-# MAIN LOOP
-
-# actions
-actionlist=""
-case "${action}" in
-
-   restart|start|stop|status|reload|condrestart|try-restart|reload-or-try-restart)
-      # re-map a few actions
-      case "${action}" in
-         "reload-or-try-restart"|try-restart) action=restart ;;
-      esac
-      x=1
-      while test ${x:-${thiscount}} -le $(( thiscount - 1 )) && test ${thiscount} -gt 1 ;
-      do
-         eval thisopt="\${opt${x}}"
-         thisopt="$( echo "${thisopt}" | sed -r -e 's/\.service$//;' )"
-         actionstatement="$( printf "%s" "service ${thisopt} ${action};" )"
-         actionlist="${actionlist:+${actionlist} }${actionstatement}"
-         x=$(( x + 1 ))
-      done
-      ;;
-
-   preset)
-      x=1
-      while test ${x:-${thiscount}} -le $(( thiscount - 1 )) && test ${thiscount} -gt 1 ;
-      do
-         eval thisopt="\${opt${x}}"
-         thisopt="$( echo "${thisopt}" | sed -r -e 's/\.service$//;' )"
-         actionstatement="$( printf "%s" "update-rc.d ${thisopt} defaults;" )"
-         actionlist="${actionlist:+${actionlist} }${actionstatement}"
-         x=$(( x + 1 ))
-      done
-      ;;
-
-   enable|disable|mask|unmask)
-      case "${action}" in
-         mask) action=disable ;;
-         unmask) action=enable ;;
-      esac
-      x=1
-      while test ${x:-${thiscount}} -le $(( thiscount - 1 )) && test ${thiscount} -gt 1 ;
-      do
-         eval thisopt="\${opt${x}}"
-         thisopt="$( echo "${thisopt}" | sed -r -e 's/\.service$//;' )"
-         actionstatement="$( printf "%s" "update-rc.d ${thisopt} ${action};" )"
-         actionlist="${actionlist:+${actionlist} }${actionstatement}"
-         test "${SYSTEMCTL_NOW}" = "1" && {
-            case "${action}" in
-               enable)
-                  nowaction=start
+cd /
+while [ $# -gt 0 ]; do
+  case "${1}" in
+    --help | -h | --h* )
+       echo "${USAGE}" >&2
+       exit 0
+       ;;
+    --version | -V )
+       echo "${VERSION}" >&2
+       exit 0
+       ;;
+    *)
+       if [ -z "${SERVICE}" -a $# -eq 1 -a "${1}" = "--status-all" ]; then
+          cd ${SERVICEDIR}
+          for SERVICE in * ; do
+            case "${SERVICE}" in
+              functions | halt | killall | single| linuxconf| kudzu)
                   ;;
-               disable)
-                  nowaction=stop
-                  ;;
+              *)
+                if ! is_ignored_file "${SERVICE}" \
+		    && [ -x "${SERVICEDIR}/${SERVICE}" ]; then
+                        out=$(env -i LANG="$LANG" LANGUAGE="$LANGUAGE" LC_CTYPE="$LC_CTYPE" LC_NUMERIC="$LC_NUMERIC" LC_TIME="$LC_TIME" LC_COLLATE="$LC_COLLATE" LC_MONETARY="$LC_MONETARY" LC_MESSAGES="$LC_MESSAGES" LC_PAPER="$LC_PAPER" LC_NAME="$LC_NAME" LC_ADDRESS="$LC_ADDRESS" LC_TELEPHONE="$LC_TELEPHONE" LC_MEASUREMENT="$LC_MEASUREMENT" LC_IDENTIFICATION="$LC_IDENTIFICATION" LC_ALL="$LC_ALL" PATH="$PATH" TERM="$TERM" "$SERVICEDIR/$SERVICE" status 2>&1)
+                        retval=$?
+                        if echo "$out" | grep -Fiq "usage:"; then
+                          #printf " %s %-60s %s\n" "[?]" "$SERVICE:" "unknown" 1>&2
+                          echo " [ ? ]  $SERVICE" 1>&2
+                          continue
+                        else
+                          if [ "$retval" = "0" -a -n "$out" ]; then
+                            #printf " %s %-60s %s\n" "[+]" "$SERVICE:" "running"
+                            echo " [ + ]  $SERVICE"
+                            continue
+                          else
+                            #printf " %s %-60s %s\n" "[-]" "$SERVICE:" "NOT running"
+                            echo " [ - ]  $SERVICE"
+                            continue
+                          fi
+                        fi
+                  #env -i LANG="$LANG" LANGUAGE="$LANGUAGE" LC_CTYPE="$LC_CTYPE" LC_NUMERIC="$LC_NUMERIC" LC_TIME="$LC_TIME" LC_COLLATE="$LC_COLLATE" LC_MONETARY="$LC_MONETARY" LC_MESSAGES="$LC_MESSAGES" LC_PAPER="$LC_PAPER" LC_NAME="$LC_NAME" LC_ADDRESS="$LC_ADDRESS" LC_TELEPHONE="$LC_TELEPHONE" LC_MEASUREMENT="$LC_MEASUREMENT" LC_IDENTIFICATION="$LC_IDENTIFICATION" LC_ALL="$LC_ALL" PATH="$PATH" TERM="$TERM" "$SERVICEDIR/$SERVICE" status
+                fi
+                ;;
             esac
-            actionstatement="$( printf "%s" "service ${thisopt} ${nowaction:-stop};" )"
-            actionlist="${actionlist:+${actionlist} }${actionstatement}"
-         }
-         x=$(( x + 1 ))
-      done
-      ;;
+          done
+          exit 0
+       elif [ $# -eq 2 -a "${2}" = "--full-restart" ]; then
+          SERVICE="${1}"
+          # On systems using systemd, we just perform a normal restart:
+          # A restart with systemd is already a full restart.
+          if [ -n "$is_systemd" ]; then
+             ACTION="restart"
+          else
+             if [ -x "${SERVICEDIR}/${SERVICE}" ]; then
+               env -i LANG="$LANG" LANGUAGE="$LANGUAGE" LC_CTYPE="$LC_CTYPE" LC_NUMERIC="$LC_NUMERIC" LC_TIME="$LC_TIME" LC_COLLATE="$LC_COLLATE" LC_MONETARY="$LC_MONETARY" LC_MESSAGES="$LC_MESSAGES" LC_PAPER="$LC_PAPER" LC_NAME="$LC_NAME" LC_ADDRESS="$LC_ADDRESS" LC_TELEPHONE="$LC_TELEPHONE" LC_MEASUREMENT="$LC_MEASUREMENT" LC_IDENTIFICATION="$LC_IDENTIFICATION" LC_ALL="$LC_ALL" PATH="$PATH" TERM="$TERM" "$SERVICEDIR/$SERVICE" stop
+               env -i LANG="$LANG" LANGUAGE="$LANGUAGE" LC_CTYPE="$LC_CTYPE" LC_NUMERIC="$LC_NUMERIC" LC_TIME="$LC_TIME" LC_COLLATE="$LC_COLLATE" LC_MONETARY="$LC_MONETARY" LC_MESSAGES="$LC_MESSAGES" LC_PAPER="$LC_PAPER" LC_NAME="$LC_NAME" LC_ADDRESS="$LC_ADDRESS" LC_TELEPHONE="$LC_TELEPHONE" LC_MEASUREMENT="$LC_MEASUREMENT" LC_IDENTIFICATION="$LC_IDENTIFICATION" LC_ALL="$LC_ALL" PATH="$PATH" TERM="$TERM" "$SERVICEDIR/$SERVICE" start
+               exit $?
+             fi
+          fi
+       elif [ -z "${SERVICE}" ]; then
+         SERVICE="${1}"
+       elif [ -z "${ACTION}" ]; then
+         ACTION="${1}"
+       else
+         OPTIONS="${OPTIONS} ${1}"
+       fi
+       shift
+       ;;
+   esac
+done
 
-   daemon-reload)
-      debuglev 1 && echo "${action} is a NOP."
-      ;;
+run_via_sysvinit() {
+   # Otherwise, use the traditional sysvinit
+   if [ -x "${SERVICEDIR}/${SERVICE}" ]; then
+      exec env -i LANG="$LANG" LANGUAGE="$LANGUAGE" LC_CTYPE="$LC_CTYPE" LC_NUMERIC="$LC_NUMERIC" LC_TIME="$LC_TIME" LC_COLLATE="$LC_COLLATE" LC_MONETARY="$LC_MONETARY" LC_MESSAGES="$LC_MESSAGES" LC_PAPER="$LC_PAPER" LC_NAME="$LC_NAME" LC_ADDRESS="$LC_ADDRESS" LC_TELEPHONE="$LC_TELEPHONE" LC_MEASUREMENT="$LC_MEASUREMENT" LC_IDENTIFICATION="$LC_IDENTIFICATION" LC_ALL="$LC_ALL" PATH="$PATH" TERM="$TERM" "$SERVICEDIR/$SERVICE" ${ACTION} ${OPTIONS}
+   else
+      echo "${SERVICE}: unrecognized service" >&2
+      exit 1
+   fi
+}
 
-   list-unit-files)
-      # Future improvement: can consume --full, but I do not care enough to deal with it now.
-      ls -Al /etc/init.d
-      ;;
-
-   is-enabled)
-      currentrunlevel=3
-      responsenumber=1
-
-      # loop through each service on the command line
-      x=1
-      while test ${x:-${thiscount}} -le $(( thiscount - 1 )) && test ${thiscount} -gt 1 ;
-      do
-         eval thisopt="\${opt${x}}"
-         thisopt="$( echo "${thisopt}" | sed -r -e 's/\.service$//;' )"
-         #actionstatement="$( printf "%s" "service ${thisopt} ${action};" )"
-         scriptfile="$( find "/etc/rc${currentrunlevel}.d" -mindepth 1 -maxdepth 1 -name "S??${thisopt}" 2>/dev/null )"
-         responsetext="disabled"
-         # if file exists, let us return 0.
-         if test -n "${scriptfile}" ;
-         then
-            responsenumber=0 # any "enabled" response makes systemctl return 0
-            responsetext="enabled"
+update_openrc_started_symlinks() {
+   # maintain the symlinks of /run/openrc/started so that
+   # rc-status works with the service command as well
+   if [ -d /run/openrc/started ] ; then
+      case "${ACTION}" in
+      start)
+         if [ ! -h /run/openrc/started/$SERVICE ] ; then
+            ln -s $SERVICEDIR/$SERVICE /run/openrc/started/$SERVICE || true
          fi
-         echo "${responsetext:-UNKNOWN}"
-         x=$(( x + 1 ))
-      done
-      exit "${responsenumber}"
       ;;
+      stop)
+         rm /run/openrc/started/$SERVICE || true
+      ;;
+      esac
+   fi
+}
 
-   is-active)
-      responsenumber=3
-      x=1
-      while test ${x:-${thiscount}} -le $(( thiscount - 1 )) && test ${thiscount} -gt 1 ;
-      do
-         eval thisopt="\${opt${x}}"
-         thisopt="$( echo "${thisopt}" | sed -r -e 's/\.service$//;' )"
-         #actionstatement="$( printf "%s" "service ${thisopt} ${action};" )"
-         servicestatus="$( service "${thisopt}" status 1>/dev/null 2>&1 ; echo "${?}" )"
-         responsetext="stopped"
-         # if file exists, let us return 0.
-         if test ${servicestatus:-1} -eq 0 ;
-         then
-            responsenumber=0
-            responsetext="active"
+# When this machine is running systemd, standard service calls are turned into
+# systemctl calls.
+if [ -n "$is_systemd" ]
+then
+   UNIT="${SERVICE%.sh}.service"
+
+   case "${ACTION}" in
+      restart|status|try-restart)
+         exec systemctl $sctl_args ${ACTION} ${UNIT}
+      ;;
+      start|stop)
+         # Follow the principle of least surprise for SysV people:
+         # When running "service foo stop" and foo happens to be a service that
+         # has one or more .socket files, we also stop the .socket units.
+         # Users who need more control will use systemctl directly.
+         for unit in $(systemctl list-unit-files --full --type=socket 2>/dev/null | sed -ne 's/\.socket\s*[a-z]*\s*$/.socket/p'); do
+             if [ "$(systemctl -p Triggers show $unit)" = "Triggers=${UNIT}" ]; then
+                systemctl $sctl_args ${ACTION} $unit
+             fi
+         done
+         exec systemctl $sctl_args ${ACTION} ${UNIT}
+      ;;
+      reload)
+         _canreload="$(systemctl -p CanReload show ${UNIT} 2>/dev/null)"
+         # Don't block on reload requests during bootup and shutdown
+         # from units/hooks and simply schedule the task.
+         if ! systemctl --quiet is-system-running; then
+              sctl_args="--no-block"
          fi
-         echo "${responsetext:-unknown}"
-         x=$(( x + 1 ))
-      done
-      exit "${responsenumber}"
-      ;;
-
-   *)
-      ferror "Fatal! 2. Unable to understand action ${action}. Aborted."
-      exit 2
-      ;;
-esac
-
-if test "${0}" = "/bin/systemctl" && test "$( readlink -f /bin/systemctl )" = "/usr/sbin/systemctl" ;
-then
-   log_to_file "META: removing /bin/systemctl symlink"
-   unlink /bin/systemctl
-   export FIX_BIN_SYSTEMCTL=1
+         if [ "$_canreload" = "CanReload=no" ]; then
+            # The reload action falls back to the sysv init script just in case
+            # the systemd service file does not (yet) support reload for a
+            # specific service.
+            run_via_sysvinit
+         else
+            exec systemctl $sctl_args reload "${UNIT}"
+         fi
+         ;;
+      force-stop)
+         exec systemctl --signal=KILL kill "${UNIT}"
+         ;;
+      force-reload)
+         _canreload="$(systemctl -p CanReload show ${UNIT} 2>/dev/null)"
+         if [ "$_canreload" = "CanReload=no" ]; then
+            exec systemctl $sctl_args restart "${UNIT}"
+         else
+            exec systemctl $sctl_args reload "${UNIT}"
+         fi
+         ;;
+      *)
+         # We try to run non-standard actions by running
+         # the init script directly.
+         run_via_sysvinit
+         ;;
+   esac
 fi
 
-if test "${0}" = "/usr/bin/systemctl" && test "$( readlink -f /usr/bin/systemctl )" = "/usr/sbin/systemctl" ;
-then
-   log_to_file "META: removing /usr/bin/systemctl symlink"
-   unlink /usr/bin/systemctl
-   export FIX_BIN_SYSTEMCTL=1
-fi
-
-# list of actions
-if test -n "${actionlist}" ;
-then
-   #debuglev 1 && ferror "Full list: ${actionlist}"
-   printf "%s" "${actionlist}" | tr ';' '\n' | while read thisaction ;
-   do
-      log_to_file "ACTION: ${thisaction}"
-      debuglev 5 && ferror "${thisaction}"
-      eval "${thisaction}"
-   done
-fi
-
-if test "${FIX_BIN_SYSTEMCTL}" = "1" ;
-then
-   log_to_file "META: restoring /bin/systemctl symlink"
-   ln -s /usr/sbin/systemctl /bin/systemctl
-   ln -s /usr/sbin/systemctl /usr/bin/systemctl 2>/dev/null # might fail if /usr/bin is symlink to /bin
-fi
-# exit cleanly
-:
+update_openrc_started_symlinks
+run_via_sysvinit

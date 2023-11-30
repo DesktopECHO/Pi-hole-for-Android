@@ -13,33 +13,38 @@ case "$1" in
 start)
         yes ' ' | sed 50q
         dbus-uuidgen --ensure
-        echo 2 | tee /proc/sys/abi/cp15_barrier
+        echo 2 | tee /proc/sys/abi/cp15_barrier > /dev/null 2>&1
         # Allow daemons to listen on network
-        sed -i "/aid_inet/c\aid_inet:x:3003:android,root,messagebus,pihole,unbound,xrdp,sshd,avahi,postfix,postdrop,redis,www-data,ncp,prometheus,sambashare,mysql" /etc/group
+        sed -i "/aid_inet/c\aid_inet:x:3003:android,root,messagebus,pihole,unbound,xrdp,sshd,avahi,postfix,postdrop,redis,www-data,ncp,prometheus,sambashare,mysql,_apt" /etc/group
+        usermod -a -G aid_net_bt,aid_net_bt_admin,aid_net_admin,aid_net_raw,aid_inet root
         # Force time sync to help devices without RTC
         sntp -t 5 -Ss -M 128 132.163.97.4 128.138.140.50 132.163.97.7 &>> /tmp/p4a.tmp
         # IP / subnet / interface detection
         subnetmask=$(ip route list table main | tail -n1) ; subnetmask=$(cut -d "/" -f2 <<< "$subnetmask") ; subnetmask=$(cut -d " " -f1 <<< "$subnetmask")
         device=$(ip route list table main | tail -n1 | cut -d' ' -f 3)
         ipaddr=$(ip route list table main | tail -n1) ; ipaddr=`echo $ipaddr | awk -F' ' ' { print $(NF-0) } '`
-        gateway=$(ip -4 route show table 0 | grep 'default via' | cut -d' ' -f 3)
-        route add default gw $gateway dev $device
+        gateway=$(ip -4 route show table 0 | grep 'default via' | cut -d' ' -f 3 | head -n 1 )
+        route add default gw $gateway dev $device  > /dev/null 2>&1
+
         # Derive hostname from device name (or set to your preference)
-        hostname=$(unchroot getprop ro.product.device) # 'Or' # hostname="Raspbian"
+        hostname=$(unchroot getprop ro.product.device) # Or set static name --> hostname="Raspbian"
+
         hstnm=$(echo $hostname | sed -e 's/ /-/g' |  sed -e 's/_/-/g'| sed -e 's/--//g')
         echo $hstnm > /proc/sys/kernel/hostname
         echo $hstnm > /etc/hostname ; sed -i "/$ipaddr/d" "/etc/hosts" ; sed -i "/$hstnm/d" "/etc/hosts"
-        echo $ipaddr $hstnm $hstnm.local >> /etc/hosts
-        echo ;  echo '___________________________________________' ; echo
+        echo $ipaddr $hstnm $hstnm.local nextcloudpi.local >> /etc/hosts
+        echo " "
+	echo "___________________________________________"
+	echo " "
         echo " Hostname: $hstnm"
         echo "IP/Subnet: $ipaddr/$subnetmask"
         echo "Interface: $device"
-        echo '___________________________________________'
-        yes ' ' | sed 2q
+        echo "___________________________________________"
+        yes ' ' | sed 4q
         export DEBIAN_FRONTEND=noninteractive
         if [ ! -f /sbin/unbound ]; then
-                echo ;  echo '___________________________________________' ; echo
-                echo "Deploying Raspbian Instance, please wait..." ; echo ; echo
+                echo '___________________________________________' ; echo ' '
+                echo "Deploying Raspbian Instance, please wait..." ; echo ' '
                 # Build setupVars.conf
                 mkdir -p /etc/pihole
                 /bin/cp /.setupVars /etc/pihole/setupVars.conf
@@ -51,13 +56,14 @@ start)
                 dpkg-reconfigure openssh-server &>> /tmp/p4a.tmp
                 /etc/init.d/ssh stop &>> /tmp/p4a.tmp
                 echo "Installing Unbound..."
-                dpkg -i /deb/unbound_*armhf.deb &>> /tmp/p4a.tmp
+                dpkg -i /deb/unbound_*.deb &>> /tmp/p4a.tmp
                 cp /.pihole.conf /etc/unbound/unbound.conf.d/pihole.conf
                 /etc/init.d/unbound restart &>> /tmp/p4a.tmp
                 echo "Installing Pi-hole..."
                 wget -q -O basic-install.sh https://install.pi-hole.net
                 bash ./basic-install.sh --unattended
                 /etc/init.d/pihole-FTL stop &>> /tmp/p4a.tmp
+                pkill lighttpd
                 echo "142.250.80.3 connectivitycheck.gstatic.com" > /etc/pihole/custom.list
                 PASSWORD=$(xkcdpass -C first -n 4 -d-)
                 echo -e "$PASSWORD\n$PASSWORD" | passwd "android" &>> /tmp/p4a.tmp
@@ -87,11 +93,11 @@ start)
         chmod +x /usr/bin/deb-systemd-helper
 
         # Clean-up environment before startup
-        rm -rf /bin/systemctl /bin/reboot /bin/poweroff /bin/service /var/lock/subsys/* /tmp/* /var/run/* /sbin/poweroff /sbin/reboot
-        /bin/cp /.service    /sbin/service
+        rm -rf /usr/bin/systemctl /bin/reboot /bin/poweroff /usr/sbin/service /var/lock/subsys/* /tmp/* /var/run/* /sbin/poweroff /sbin/reboot
+        /bin/cp /.service    /usr/sbin/service
         /bin/cp /.poweroff   /sbin/poweroff
         /bin/cp /.reboot     /sbin/reboot
-        /bin/cp /.systemctl  /sbin/systemctl
+        /bin/cp /.systemctl  /usr/bin/systemctl
         /bin/cp /.xrdp.ini   /etc/xrdp/xrdp.ini
         /bin/cp /.logo.bmp   /etc/xrdp/logo.bmp
 

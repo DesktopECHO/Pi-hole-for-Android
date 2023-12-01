@@ -15,8 +15,8 @@ wget -q https://old.kali.org/kali/pool/main/g/gksu/gksu_2.0.2-9%2Bb1_$(dpkg --pr
 wget -q https://old.kali.org/kali/pool/main/libg/libgksu/libgksu2-0_2.0.13~pre1-9%2Bb2_$(dpkg --print-architecture).deb
 
 # Install minimal PIXEL Desktop GUI packages and gksu
-sudo apt-get -y install raspberrypi-ui-mods lxplug-menu lxinput lxterminal lxplug-cputemp lxplug-volumepulse libxfce4util7 libxfconf-0-3 libxfce4util-bin fonts-piboto pipanel rpd-wallpaper pishutdown scrot pi>
-sudo apt-get -y install geany lxtask xarchiver galculator dmz-cursor-theme 
+sudo apt-get -y install raspberrypi-ui-mods lxplug-menu lxinput lxterminal lxplug-cputemp lxplug-volumepulse pulseaudio pavucontrol libxfce4util7 libxfconf-0-3 libxfce4util-bin fonts-piboto pipanel rpd-wallpaper pishutdown scrot pixflat-icons lxsession-default-apps lxsession-edit gtk2-engines-pixflat gtk2-engines-clearlookspix gtk2-engines-pixbuf mousepad synaptic ./libgnome-keyring-common_*.deb ./libgnome-keyring0_*.deb ./gksu_*.deb ./libgksu2-*.deb --no-install-recommends
+sudo apt-get -y install geany lxtask xarchiver galculator dmz-cursor-theme
 sudo update-alternatives --set x-cursor-theme /usr/share/icons/DMZ-White/cursor.theme
 
 # Cleanup GUI packages

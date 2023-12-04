@@ -15,9 +15,13 @@ wget -q https://old.kali.org/kali/pool/main/libg/libgnome-keyring/libgnome-keyri
 wget -q https://old.kali.org/kali/pool/main/g/gksu/gksu_2.0.2-9%2Bb1_$ARCH.deb
 wget -q https://old.kali.org/kali/pool/main/libg/libgksu/libgksu2-0_2.0.13~pre1-9%2Bb2_$ARCH.deb
 
-# Install systemd as a placeholder, replace systemctl with a version for containers
+# Install systemd as a placeholder and replace systemctl with version for containers
 sudo apt-get -y install systemd --no-install-recommends
-sudo /bin/cp /.systemctl /usr/bin/systemctl
+sudo rm /usr/sbin/service  ; sudo /bin/cp /.service    /usr/sbin/service
+sudo rm /sbin/poweroff     ; sudo /bin/cp /.poweroff   /sbin/poweroff
+sudo rm /sbin/reboot       ; sudo /bin/cp /.reboot     /sbin/reboot
+sudo rm /usr/bin/systemctl ; sudo /bin/cp /.systemctl  /usr/bin/systemctl
+sudo bash -c 'rm -f /usr/sbin/runlevel ; echo "echo N 3" > /usr/sbin/runlevel ; chmod +x /usr/sbin/runlevel'
 
 # Install minimal PIXEL Desktop GUI packages and gksu
 sudo apt-get -y install raspberrypi-ui-mods lxplug-menu lxinput lxterminal lxplug-cputemp lxplug-volumepulse pulseaudio pavucontrol libxfce4util7 libxfconf-0-3 libxfce4util-bin fonts-piboto pipanel rpd-wallpaper pishutdown scrot pixflat-icons lxsession-default-apps lxsession-edit gtk2-engines-pixflat gtk2-engines-clearlookspix gtk2-engines-pixbuf mousepad synaptic neofetch ./*.deb --no-install-recommends

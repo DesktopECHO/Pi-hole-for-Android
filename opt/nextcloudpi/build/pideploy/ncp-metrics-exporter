@@ -1,0 +1,37 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          ncp-metrics-exporter
+# Required-Start:    $remote_fs
+# Required-Stop:     $remote_fs
+# Should-Start:      $syslog
+# Should-Stop:       $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: NCP Metrics Exporter
+# Description:       NCP Metrics Exporter
+#                    automatically
+### END INIT INFO
+
+#NCP_CONFIG_DIR=/usr/local/etc/
+#PATH=/sbin:/bin:/usr/sbin:/usr/bin
+#DESC="NCP Metrics Exporter"
+NAME="ncp-metrics-exporter"
+DAEMON="/usr/local/lib/ncp-metrics/$NAME"
+#SCRIPTNAME=/etc/init.d/$NAME
+. /lib/lsb/init-functions
+
+case "$1" in
+    start)
+        [ ! -e /usr/local/etc/ncp-metrics.cfg ] && bash -c "source /usr/local/etc/library.sh ; install_template ncp-metrics.cfg.sh /usr/local/etc/ncp-metrics.cfg"
+        log_daemon_msg "Starting $DESC" "$NAME"
+	bash -c $DAEMON > /var/log/nc-metrics-exporter 2>&1 &
+        log_end_msg $?
+        ;;
+    stop)
+        killall $DAEMON
+        return 0
+        ;;
+esac
+
+exit 0
+}

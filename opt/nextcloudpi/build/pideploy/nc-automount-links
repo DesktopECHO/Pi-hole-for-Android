@@ -1,0 +1,60 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          nextcloud-automount-links
+# Required-Start:    $remote_fs
+# Required-Stop:     $remote_fs
+# Should-Start:      $syslog
+# Should-Stop:       $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Nextcloud Automount Links
+# Description:       Monitor /media for mountpoints and create USBdrive* symlinks
+#                    automatically
+### END INIT INFO
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+DESC="Nextcloud Automount Links"
+NAME="nc-automount-links-mon"
+DAEMON="/usr/local/etc/$NAME"
+SCRIPTNAME="/etc/init.d/$NAME"
+
+# Gracefully exit if the package has been removed.
+test -x $DAEMON || exit 0
+
+. /lib/lsb/init-functions
+
+#
+#       Function that starts the daemon/service.
+#
+d_start() {
+	$DAEMON > /var/log/nc-automount-links-mon 2>&1 &
+}
+d_stop() {
+        pkill -f /usr/local/etc/nc-automount-links-mon
+}
+
+
+case "$1" in
+    start)
+        log_daemon_msg "Starting $DESC" "$NAME"
+        d_start
+	echo " [Ok]"
+        ;;
+    stop)
+        log_daemon_msg "Stopping $DESC" "$NAME"
+        d_stop
+	echo " [Ok]"
+        ;;
+ restart)
+        log_daemon_msg "Restarting $DESC" "$NAME"
+        d_stop
+        d_start
+	echo " [Ok]"
+        ;;
+    *)
+        echo "Usage: $SCRIPTNAME {start|stop}" >&2
+        exit 3
+        ;;
+esac
+
+exit 0

@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# update latest available version in /var/run/.ncp-latest-version
+
+TEMPDIR="$( mktemp -d /tmp/ncp-check.XXXXXX || ( echo "Failed to create temp dir. Exiting" >&2; exit 1 ) )"
+trap "rm -rf \"${TEMPDIR}\"; exit 0" 0 1 2 3 15
+
+BRANCH="master"
+{ [[ -f /.dockerenv ]] || [[ -f /.docker-image ]] || [[ "$DOCKERBUILD" == 1 ]]; } && BRANCH="docker-stable"
+
+git clone -b "$BRANCH" --depth 20 -q --bare https://github.com/nextcloud/nextcloudpi.git "$TEMPDIR" || {
+  echo "The git clone command failed: No connectivity to https://github.com ?" >&2
+  exit 1
+}
+
+cd "$TEMPDIR" || exit 1
+VER=$( git describe --always --tags | grep -oP "v\d+\.\d+\.\d+" )
+
+canary="$(. /usr/local/etc/library.sh; find_app_param ncp-community.sh CANARY)"
+# TODO: Remove temporary canary override after staged rollouts test
+canary="no"
+
+[[ "$canary" != "yes" ]] && [[ -f "/usr/local/etc/instance.cfg" ]] && {
+  cohorte_id="$(jq .cohorteId /usr/local/etc/instance.cfg)"
+  [[ -f "./staged_rollouts/${VER}.txt" ]] && {
+    grep "^${cohorte_id}$" "./staged_rollouts/${VER}.txt" || {
+      echo "Skipping version $VER - cohorte ${cohorte_id} not yet active"
+      cd / || exit 1
+      exit 0
+    }
+  }
+}
+
+grep -qP "v\d+\.\d+\.\d+" <<< "$VER" && {       # check format
+  echo "$VER" > /var/run/.ncp-latest-version
+
+  # write changelog
+  git log --graph --oneline --decorate \
+    --pretty=format:"[%D] %s" --date=short | \
+    grep 'tag: v' | \
+    sed '/HEAD ->\|origin/s|\[.*\(tag: v[0-9]\+\.[0-9]\+\.[0-9]\+\).*\]|[\1]|' | \
+    sed 's|* \[tag: |[|' > /usr/local/etc/ncp-changelog
+}
+cd / || exit 1

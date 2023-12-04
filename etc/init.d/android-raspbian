@@ -13,63 +13,67 @@ case "$1" in
 start)
         # some devices have hidepid=2 set
         mount -o remount,rw,hidepid=0 /proc
-        echo 2 | tee /proc/sys/abi/cp15_barrier > /dev/null 2>&1
+        echo 2 | tee /proc/sys/abi/cp15_barrier >/tmp/p4a.log 2>&1
         dbus-uuidgen --ensure
         # Allow daemons to listen on network
         sed -i "/aid_inet/c\aid_inet:x:3003:android,root,messagebus,pihole,unbound,xrdp,sshd,avahi,postfix,postdrop,redis,www-data,ncp,prometheus,sambashare,mysql,_apt" /etc/group
         usermod -a -G aid_net_bt,aid_net_bt_admin,aid_net_admin,aid_net_raw,aid_inet root
         # Force time sync to help devices without RTC
-        sntp -t 5 -Ss -M 128 132.163.97.4 128.138.140.50 132.163.97.7 &>> /tmp/p4a.tmp
+        sntp -t 5 -Ss -M 128 132.163.97.4 128.138.140.50 132.163.97.7 >>/tmp/p4a.log 2>&1
         # IP / subnet / interface detection
         subnetmask=$(ip route list table main | tail -n1) ; subnetmask=$(cut -d "/" -f2 <<< "$subnetmask") ; subnetmask=$(cut -d " " -f1 <<< "$subnetmask")
         device=$(ip route list table main | tail -n1 | cut -d' ' -f 3)
         ipaddr=$(ip route list table main | tail -n1) ; ipaddr=`echo $ipaddr | awk -F' ' ' { print $(NF-0) } '`
         gateway=$(ip -4 route show table 0 | grep 'default via' | cut -d' ' -f 3 | head -n 1 )
-        route add default gw $gateway dev $device  > /dev/null 2>&1
+        route add default gw $gateway dev $device  >>/tmp/p4a.log 2>&1
 
         # Derive hostname from device name (or set to your preference)
         hostname=$(unchroot getprop ro.product.device) # Or set static name --> hostname="Raspbian"
-        yes ' ' | sed 50q
+        yes ' ' | sed 60q
 
         hstnm=$(echo $hostname | sed -e 's/ /-/g' |  sed -e 's/_/-/g'| sed -e 's/--//g')
         echo $hstnm > /proc/sys/kernel/hostname
         echo $hstnm > /etc/hostname ; sed -i "/$ipaddr/d" "/etc/hosts" ; sed -i "/$hstnm/d" "/etc/hosts"
         echo $ipaddr $hstnm nextcloudpi >> /etc/hosts
         echo " "
-	echo "___________________________________________"
-	echo " "
+        echo "_______________________________________________"
+        echo " "
         echo " Hostname: $hstnm"
         echo "IP/Subnet: $ipaddr/$subnetmask"
         echo "Interface: $device"
-        echo "___________________________________________"
+        echo "_______________________________________________"
         yes ' ' | sed 4q
         export DEBIAN_FRONTEND=noninteractive
         if [ ! -f /sbin/unbound ]; then
-                echo '___________________________________________' ; echo ' '
-                echo "Deploying Raspbian Instance, please wait..." ; echo ' '
+                echo "_______________________________________________" ; echo ' '
+                echo "Deploying Linux Instance, please wait...       " ; echo ' '
                 # Build setupVars.conf
                 mkdir -p /etc/pihole
                 /bin/cp /.setupVars /etc/pihole/setupVars.conf
-                openssl req -new -newkey rsa:4096 -days 3650 -nodes -x509 -subj "/C=bm/ST=Pembroke/L=Hamilton/O=DesktopECHO/CN=$hstnm.local" -keyout /etc/ssl/private/ssl-cert-snakeoil.key -out /etc/ssl/certs/ssl-cert-snakeoil.pem &>> /tmp/p4a.tmp
+                openssl req -new -newkey rsa:4096 -days 3650 -nodes -x509 -subj "/C=bm/ST=Pembroke/L=Hamilton/O=DesktopECHO/CN=$hstnm.local" -keyout /etc/ssl/private/ssl-cert-snakeoil.key -out /etc/ssl/certs/ssl-cert-snakeoil.pem >>/tmp/p4a.log 2>&1
                 chown root:xrdp /etc/ssl/certs/ssl-cert-snakeoil.pem ; chmod 660 /etc/ssl/certs/ssl-cert-snakeoil.pem
                 chown root:xrdp /etc/ssl/private/ssl-cert-snakeoil.key  ; chmod 660  /etc/ssl/private/ssl-cert-snakeoil.key
-                adduser xrdp ssl-cert &>> /tmp/p4a.tmp
+                adduser xrdp ssl-cert >>/tmp/p4a.log 2>&1
                 echo "Regenerate SSH Keys..."
-                dpkg-reconfigure openssh-server &>> /tmp/p4a.tmp
-                /etc/init.d/ssh stop &>> /tmp/p4a.tmp
+                dpkg-reconfigure openssh-server >>/tmp/p4a.log 2>&1
+                dpkg-reconfigure dropbear >>/tmp/p4a.log 2>&1
+                dropbearkey -t dss -f /etc/dropbear/dropbear_dss_host_key >>/tmp/p4a.log 2>&1
+                /etc/init.d/ssh stop >>/tmp/p4a.log 2>&1
+                update-rc.d ssh disable >>/tmp/p4a.log 2>&1
+                pkill dropbear >>/tmp/p4a.log 2>&1
                 echo "Installing Unbound..."
-                dpkg -i /deb/unbound_*.deb &>> /tmp/p4a.tmp
+                dpkg -i /deb/unbound_*.deb >>/tmp/p4a.log 2>&1
                 cp /.pihole.conf /etc/unbound/unbound.conf.d/pihole.conf
-                /etc/init.d/unbound restart &>> /tmp/p4a.tmp
+                /etc/init.d/unbound restart >>/tmp/p4a.log 2>&1
                 echo "Installing Pi-hole..."
                 wget -q -O basic-install.sh https://install.pi-hole.net
                 bash ./basic-install.sh --unattended
-                /etc/init.d/pihole-FTL stop &>> /tmp/p4a.tmp
+                /etc/init.d/pihole-FTL stop >>/tmp/p4a.log 2>&1
                 pkill lighttpd
                 echo "142.250.80.3 connectivitycheck.gstatic.com" > /etc/pihole/custom.list
                 PASSWORD=$(xkcdpass -C first -n 4 -d-)
-                echo -e "$PASSWORD\n$PASSWORD" | passwd "android" &>> /tmp/p4a.tmp
-                pihole -a -p "$PASSWORD" &>> /tmp/p4a.tmp
+                echo -e "$PASSWORD\n$PASSWORD" | passwd "android" >>/tmp/p4a.log 2>&1
+                pihole -a -p "$PASSWORD" >>/tmp/p4a.log 2>&1
                 echo "$PASSWORD" > /var/tmp/p4a
         fi
 
@@ -82,7 +86,7 @@ start)
         curl --silent --output /bin/padd https://raw.githubusercontent.com/pi-hole/PADD/master/padd.sh &
 
         # Setup environment and ensure users are in right groups
-        rm -f /usr/sbin/runlevel ; echo 'echo N 3' > /usr/sbin/runlevel ; chmod +x /usr/sbin/runlevel
+        rm -f /usr/sbin/runlevel ; echo 'echo N 3' > /sbin/runlevel ; chmod +x /sbin/runlevel
         dpkg-divert --local --rename --add /sbin/initctl &>> /tmp/p4a.tmp
         ln -fs /bin/true /sbin/initctl
 

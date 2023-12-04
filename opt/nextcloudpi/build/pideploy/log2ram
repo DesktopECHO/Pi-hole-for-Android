@@ -1,0 +1,44 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          log2ram
+# Required-Start:    
+# Required-Stop:     
+# Should-Start:      
+# Should-Stop:       
+# Default-Start:     
+# Default-Stop:      0 1 6
+# Short-Description: Logfiles to RAM disk
+# Description:       Logfiles to RAM disk
+### END INIT INFO
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+DESC="Logfiles to RAM disk"
+NAME="log2ram"
+DAEMON="/usr/local/bin/$NAME"
+SCRIPTNAME="/etc/init.d/$NAME"
+
+. /lib/lsb/init-functions
+
+case "$1" in
+    start)
+        log_daemon_msg "Starting $DESC" "$NAME"
+	$DAEMON start >> /tmp/log2ram
+        log_end_msg $?
+        ;;
+    stop)
+        log_daemon_msg "Stopping $DESC" "$NAME"
+	$DAEMON stop >> /tmp/log2ram
+        log_end_msg $?
+        ;;
+ restart)
+        log_daemon_msg "Reloading  $DESC" "$NAME"
+	$DAEMON write >> /tmp/log2ram
+        log_end_msg $?
+        ;;
+       *)
+        echo "Usage: $SCRIPTNAME {start|stop|restart}"
+        exit 3
+        ;;
+esac
+
+exit 0

@@ -64,15 +64,15 @@ fi
 
 
 case "$1" in
-start)	log_daemon_msg "Starting scheduler" "cron"
+start)	# log_daemon_msg "Starting scheduler" "cron"
         start_daemon -p $PIDFILE $DAEMON $EXTRA_OPTS
-        log_end_msg $?
+        # log_end_msg $?
 	;;
-stop)	log_daemon_msg "Stopping scheduler" "cron"
+stop)	# log_daemon_msg "Stopping scheduler" "cron"
         killproc -p $PIDFILE $DAEMON
         RETVAL=$?
         [ $RETVAL -eq 0 ] && [ -e "$PIDFILE" ] && rm -f $PIDFILE
-        log_end_msg $RETVAL
+        # log_end_msg $RETVAL
         ;;
 restart) log_daemon_msg "Restarting scheduler" "cron" 
         $0 stop

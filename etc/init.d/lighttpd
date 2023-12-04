@@ -53,22 +53,22 @@ fi
 case "$1" in
     start)
         check_syntax
-        log_daemon_msg "Starting $DESC" $NAME
+        # log_daemon_msg "Starting $DESC" $NAME
         if ! start-stop-daemon --start --oknodo --quiet \
             --pidfile $PIDFILE --exec $DAEMON -- $DAEMON_OPTS
         then
             log_end_msg 1
-        else
-            log_end_msg 0
+        #else
+        #    log_end_msg 0
         fi
         ;;
     stop)
-        log_daemon_msg "Stopping $DESC" $NAME
+        # log_daemon_msg "Stopping $DESC" $NAME
         if start-stop-daemon --stop --retry 30 --oknodo --quiet \
             --pidfile $PIDFILE --exec $DAEMON
         then
             rm -f $PIDFILE
-            log_end_msg 0
+            # log_end_msg 0
         else
             log_end_msg 1
         fi

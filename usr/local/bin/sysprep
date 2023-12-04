@@ -50,6 +50,7 @@ rm -rf /var/cache/apt/*
 rm -rf /var/lib/apt/*
 rm -rf /var/swap
 rm -rf /etc/ssh/ssh_host_*
+rm -rf /etc/dropbear/*_key /etc/dropbear/log/* /etc/dropbear/run/*
 touch /var/log/xrdp ; touch /var/log/xrdp.log ; touch /var/log/xrdp-sesman.log  ; chown root:xrdp /var/log/xrdp* ; chmod 660 /var/log/xrd*
 echo "127.0.0.1  localhost"                  >  /etc/hosts
 echo "::1        ip6-localhost ip6-loopback" >> /etc/hosts

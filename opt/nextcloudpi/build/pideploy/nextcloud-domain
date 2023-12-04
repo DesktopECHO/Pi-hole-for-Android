@@ -1,0 +1,64 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          nextcloud-domain
+# Required-Start:    
+# Required-Stop:     
+# Should-Start:      
+# Should-Stop:       
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Nextcloud Domain
+# Description:       Nextcloud Domain
+### END INIT INFO
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+DESC="Nextcloud Domain"
+NAME="nextcloud-domain"
+DAEMON="/usr/local/bin/$NAME.sh"
+SCRIPTNAME=/etc/init.d/$NAME
+
+# Gracefully exit if the package has been removed.
+# test -x $DAEMON || exit 0
+
+. /lib/lsb/init-functions
+
+#
+#       Function that starts the daemon/service.
+#
+
+d_start() {
+    sudo bash $DAEMON > /var/log/nextcloud-domain 2>&1 &
+}
+
+d_stop() {
+    echo " [Ok]"
+}
+
+d_restart() {
+    sudo bash $DAEMON > /var/log/nextcloud-domain 2>&1 &
+}
+
+case "$1" in
+    start)
+        log_daemon_msg "Starting $DESC" "$NAME"
+        d_start
+        log_end_msg $?
+        ;;
+    stop)
+        log_daemon_msg "Stopping $DESC" "$NAME"
+        d_stop
+        log_end_msg $?
+        ;;
+ restart)
+        log_daemon_msg "Restarting $DESC" "$NAME"
+        d_restart
+        log_end_msg $?
+        ;;
+    *)
+        echo "Usage: $SCRIPTNAME {start|stop|restart}" >&2
+        exit 3
+        ;;
+esac
+
+exit 0
+

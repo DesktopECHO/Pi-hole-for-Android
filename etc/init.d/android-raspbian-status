@@ -12,13 +12,16 @@
 case "$1" in
 start)
 
-yes ' ' | sed 50q
-DIST=$(cat /etc/*-release | egrep "PRETTY_NAME" | cut -d = -f 2 | tr -d '"')
+yes ' ' | sed 60q
 IP=$(avahi-resolve -4 -n pihole.local | cut -f 2) ; (&>/dev/null avahi-publish -a -R $(hostname).local $IP &)
 IP=$(avahi-resolve -4 -n pihole.local | cut -f 2) ; (&>/dev/null avahi-publish -a -R nextcloudpi.local $IP &)
-echo $DIST on $HOSTNAME
-echo '______________________________________________'
-echo '                                              '
+DIST=$(cat /etc/*-release | egrep "PRETTY_NAME" | cut -d = -f 2 | tr -d '"')
+ARCH=$(dpkg --print-architecture)
+[[ "$ARCH" = "aarch64" ]] && ARCH="ARM64" || ARCH="ARM32"
+printf "\n$DIST $ARCH on $(hostname)\n" > /etc/motd
+cat /etc/motd
+echo '_______________________________________________'
+echo '                                               '
    pihole -v
    if [ -f /var/tmp/p4a ] ; then
       P4A=`cat /var/tmp/p4a`
@@ -33,17 +36,17 @@ echo '                                              '
      echo " "
      pihole status
   fi
-echo '______________________________________________'
+echo '_______________________________________________'
 echo
 ;;
 
 stop)
 
 yes ' ' | sed 50q
-echo '______________________________________________'
-echo '                                              '
-echo '  *** Linux Container Shutdown Initiated ***  '
-echo '______________________________________________'
+echo '_______________________________________________'
+echo '                                               '
+echo '     *** Container SHUTDOWN Initiated! ***     '
+echo '_______________________________________________'
 yes ' ' | sed 2q
 ;;
 

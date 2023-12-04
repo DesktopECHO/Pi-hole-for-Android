@@ -1,1 +1,0 @@
-[ -f /usr/local/bin/pihole ] && echo && pihole status && echo && pihole version && echo

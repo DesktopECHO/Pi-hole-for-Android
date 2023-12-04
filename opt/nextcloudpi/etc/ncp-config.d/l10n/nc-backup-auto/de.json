@@ -1,0 +1,12 @@
+{
+    "translations":{
+    "ACTIVE":"Aktiviert",
+        "DESTDIR":"Ziel-Verzeichnis",
+        "INCLUDEDATA":"Daten mit sichern",
+        "COMPRESS":"Komprimieren",
+        "BACKUPDAYS":"Sicherungs-Periode (in Tage)",
+        "BACKUPLIMIT":"Sicherungs-Limit",
+        "nc-backup-auto":"Automatische Sicherung"
+        
+    }
+}

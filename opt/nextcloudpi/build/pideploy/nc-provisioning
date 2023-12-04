@@ -1,0 +1,39 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          nc-provisioning
+# Required-Start:    $remote_fs
+# Required-Stop:     $remote_fs
+# Should-Start:      $syslog
+# Should-Stop:       $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: NextcloudPi Provisioning
+# Description:       NextcloudPi Provisioning
+#                    automatically
+### END INIT INFO
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+DESC="NextcloudPi Provisioning"
+NAME="ncp-provisioning"
+DAEMON="/usr/local/bin/$NAME"
+SCRIPTNAME=/etc/init.d/$NAME
+. /lib/lsb/init-functions
+
+
+case "$1" in
+    start)
+        log_daemon_msg "Starting $DESC" "$NAME"
+	bash $DAEMON.sh > /var/log/nc-provisioning 2>&1 &
+        ;;
+    stop)
+        pkill -f $DAEMON.sh 
+        echo " [Ok]"
+        ;;
+    *)
+        echo "Usage: $SCRIPTNAME {start|stop}" >&2
+        exit 3
+        ;;
+esac
+
+exit 0
+

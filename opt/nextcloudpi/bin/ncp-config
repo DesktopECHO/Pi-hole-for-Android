@@ -1,0 +1,132 @@
+#!/bin/bash
+
+# NextCloudPi software configuration
+#
+# Copyleft 2017 by Ignacio Nunez Hernanz <nacho _a_t_ ownyourbits _d_o_t_ com>
+# GPL licensed (see end of file) * Use at your own risk!
+#
+# Usage:
+#   sudo ncp-config
+#
+# More at https://ownyourbits.com/2017/03/13/nextcloudpi-gets-nextcloudpi-config/
+#
+
+BINDIR=/usr/local/bin/ncp
+
+source /usr/local/etc/library.sh
+{
+  ncpversion="$(cat /usr/local/etc/ncp-version)"
+  chlogfile=/usr/local/etc/ncp-changelog
+  # ask for update if outdated
+  ncp-test-updates 2>/dev/null && {
+    [[ -f "$chlogfile" ]] && changelog=$( head -4 "$chlogfile" )
+
+    latest_ver="$(cat /var/run/.ncp-latest-version 2>/dev/null)"
+    whiptail --backtitle "$backtitle $ncpversion" \
+             --title "NextCloudPi update available" \
+             --clear --yesno "Update to $latest_ver?\n\n$changelog" \
+             15 70
+
+    [[ $? -eq $dialog_ok ]] && ncp-update
+  }
+
+function generate_list()
+{
+  local dir="$1"
+  unset list
+  for item in "$dir"/*; do
+
+    # directories
+    [[ -d "$item" ]] && {
+      local dir="$( basename "$item" )"
+      list+=("  $dir" "")
+      continue
+    }
+
+    [[ "$item" =~ ".sh" ]] || continue
+
+    # regular ncp_apps
+    local app="$( basename "$item" .sh )"
+    local cfg="$cfgdir/$app".cfg
+
+    [[ -f "$cfg" ]] && local desc=$( jq -r .description "$cfg" ) || local desc="No description."
+    is_active_app "$app" "$dir" && local on="*" || local on=" "
+
+    list+=( "$on $app" "$desc" )
+  done
+}
+
+function config_menu()
+{
+  local dir="$1"
+  local backtitle="NextCloudPi configuration ver. "
+  local ncpversion="$(cat /usr/local/etc/ncp-version  )"
+  local cfgdir=/usr/local/etc/ncp-config.d
+  local dialog_ok=0
+  local desc cfg ncp_app
+
+  while true; do
+
+    # menu items
+    generate_list "$dir"
+
+    # launch the selection menu
+    [[ "$dir" == "$BINDIR" ]] && local cancel_btn="Finish" || local cancel_btn="Back"
+    ncp_app=$( whiptail --backtitle "$backtitle $ncpversion" \
+                       --title "NextCloudPi Configuration Tool (ncp-config)" \
+                       --cancel-button $cancel_btn --ok-button Select \
+                       --menu "Select ncp-app to configure or activate:" 20 105 10 \
+                       "${list[@]}" \
+              3>&1 1>&2 2>&3 )
+
+    [[ $? -ne $dialog_ok ]] || [[ "$ncp_app" == "" ]] && {
+      [[ "$dir" == "$BINDIR" ]] && return 0
+      dir="$(dirname "$dir")"
+      continue
+    }
+
+    # remove * and spaces
+    ncp_app=$( sed  's=*\| ==g' <<< "$ncp_app" )
+
+    # directory selection
+    [[ -d "$dir/$ncp_app" ]] && {
+      dir="$dir/$ncp_app"
+      config_menu "$dir"
+      return
+    }
+
+    # launch selected ncp_app
+    info_app      "$ncp_app" || continue
+    configure_app "$ncp_app" && \
+    run_app       "$ncp_app"
+    echo "Done. Press any key..."
+    read -r
+  done
+}
+
+if [[ ${EUID} -ne 0 ]]; then
+  printf "Must be run as root. Try 'sudo $( basename "$0" )'\n"
+  exit 1
+fi
+
+config_menu "$BINDIR"
+
+exit $?
+} # force to read the whole thing into memory, as its contents might change in update.sh
+
+# License
+#
+# This script is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This script is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this script; if not, write to the
+# Free Software Foundation, Inc., 59 Temple Place, Suite 330,
+# Boston, MA  02111-1307  USA

@@ -1,0 +1,56 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+#
+# Vagrantfile for the NCP Debian VM
+#
+# Instructions: vagrant up; vagrant ssh
+#
+# Notes: User/Pass is ubnt/ubnt.
+# $HOME is accessible as /external. CWD is accessible as /cwd
+#
+
+Vagrant.configure("2") do |config|
+
+  vmname = "NCP Debian VM"
+  release = ENV["DEB_RELEASE"]
+  config.vm.box = "debian/#{release}64"
+  config.vm.box_check_update = true
+  config.vm.hostname = "ncp-vm"
+  config.vm.define "ncp-vm"
+  config.vm.provider :libvirt do |libvirt|
+    libvirt.default_prefix = ""
+    libvirt.cpus = 4
+    libvirt.memory = 1024
+  end
+
+  config.vm.synced_folder '.', '/vagrant', disabled: true
+
+  $script = <<-SHELL
+    sudo su
+    set -e
+    BRANCH=master
+    #BRANCH=devel  # uncomment to install devel
+    echo Skipping apt-get update
+    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends git ca-certificates
+
+    # install
+    git clone -b "$BRANCH" https://github.com/nextcloud/nextcloudpi.git /tmp/nextcloudpi
+    cd /tmp/nextcloudpi
+
+    source install.sh
+
+    # cleanup
+    source etc/library.sh
+    run_app_unsafe post-inst.sh
+    cd /
+    rm -r /tmp/nextcloudpi
+    echo "root:ownyourbits" | chpasswd
+    systemctl disable sshd
+    poweroff
+  SHELL
+
+  # Provision the VM
+  config.vm.provision "shell", inline: $script
+
+end

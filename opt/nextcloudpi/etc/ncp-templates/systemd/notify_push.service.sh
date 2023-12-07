@@ -2,6 +2,7 @@
 
 set -e
 source /usr/local/etc/library.sh
+[ $(dpkg --print-architecture) = "arm64" ] && ARCH="aarch64" || ARCH="armv7"
 
 cat <<EOF
 [Unit]
@@ -13,7 +14,7 @@ Requires=redis.service
 [Service]
 Environment=PORT=7867
 Environment=NEXTCLOUD_URL=https://localhost
-ExecStart=/var/www/nextcloud/apps/notify_push/bin/aarch64/notify_push --allow-self-signed /var/www/nextcloud/config/config.php
+ExecStart=/var/www/nextcloud/apps/notify_push/bin/$ARCH/notify_push --allow-self-signed /var/www/nextcloud/config/config.php
 User=www-data
 Restart=on-failure
 RestartSec=20

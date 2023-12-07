@@ -2,9 +2,9 @@
 ### BEGIN INIT INFO
 # Provides:          notify_push
 # Required-Start:    mariadb redis-server apache2
-# Required-Stop:     
-# Should-Start:      
-# Should-Stop:       
+# Required-Stop:
+# Should-Start:
+# Should-Stop:
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: Push Notification Service
@@ -16,26 +16,28 @@ DESC="Push Notification"
 NAME="notify_push"
 DAEMON="/usr/local/etc/$NAME"
 SCRIPTNAME="/etc/init.d/$NAME"
+ARCH=$(dpkg --print-architecture)
+[ "$ARCH" = "arm64" ] && ARCH="aarch64" || ARCH="armv7"
 
-chmod +x /var/www/nextcloud/apps/notify_push/bin/aarch64/notify_push
+chmod +x /var/www/nextcloud/apps/notify_push/bin/$ARCH/notify_push
 . /lib/lsb/init-functions
 
 
 case "$1" in
     start)
-        log_daemon_msg "Starting $DESC" "$NAME"
-	systemctl start notify_push
-        log_end_msg $?
+        # log_daemon_msg "Starting $DESC" "$NAME"
+        systemctl start notify_push
+        # log_end_msg $?
         ;;
     stop)
-        log_daemon_msg "Stopping $DESC" "$NAME"
-	pkill -f /var/www/nextcloud/apps/notify_push/bin/aarch64/notify_push
-        log_end_msg $?
+        # log_daemon_msg "Stopping $DESC" "$NAME"
+        pkill -f /var/www/nextcloud/apps/notify_push/bin/$ARCH/notify_push
+        # log_end_msg $?
         ;;
  restart)
         killall notify_push &>/dev/null
         log_daemon_msg "Restarting $DESC" "$NAME"
-	pkill -f /var/www/nextcloud/apps/notify_push/bin/aarch64/notify_push
+        pkill -f /var/www/nextcloud/apps/notify_push/bin/$ARCH/notify_push
         systemctl start notify_push
         log_end_msg $?
         ;;
@@ -46,4 +48,3 @@ case "$1" in
 esac
 
 exit 0
-

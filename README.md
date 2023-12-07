@@ -2,20 +2,25 @@
 
 ![IMG_2229](https://user-images.githubusercontent.com/33142753/133272103-28c6eba3-d1f7-4e29-9c5b-7d96d9f94e9e.jpg)
 
-**Note:** There is no endorsement or partnership between this page and [Pi-hole© LLC](https://pi-hole.net/). They deserve [your support](https://pi-hole.net/donate/) if you find this useful.
+[Pi-hole©](https://pi-hole.net/) is a network-level advertisement and Internet tracker blocking application for Linux which acts as a DNS sinkhole intended for use on a private network. It is designed for low-power embedded devices with network capability, focusing on the Raspberry Pi as its 'reference' hardware platform.
 
-Pi-hole is a network-level advertisement and Internet tracker blocking application for Linux which acts as a DNS sinkhole intended for use on a private network. It is designed for low-power embedded devices with network capability, focusing on the Raspberry Pi as its 'reference' hardware platform.
+Pi-hole for Android is a Debian disk image tuned to work with the Pi-hole installer on Pi Deploy (a fork of Linux Deploy).  It can be used on **any** rooted Android device with an **ARMv7 or newer CPU** running Android 5.0 (Lolipop) or newer.  Form factor is not important; it could be a phone, tablet, HDMI stick or **any device running Android**.  For very old devices running Android 4.x, see the [Legacy branch](https://github.com/DesktopECHO/Pi-hole-for-Android/tree/legacy)
 
-Pi-hole for Android is a Raspbian disk image tuned to work with the Pi-hole installer on Pi Deploy (a fork of Linux Deploy).  It can be used on **any** rooted Android device with an **ARMv7 or newer CPU** running Android 5.0 (Lolipop) or newer.  Form factor is not important; it could be a phone, tablet, HDMI stick or **any device running Android**.  For very old devices running Android 4.x, see the [Legacy branch](https://github.com/DesktopECHO/Pi-hole-for-Android/tree/legacy)
+### What's New (December 2023)
+ - Updated image to Debian 12 (Bookworm)
+ - Pi Deploy image is now **64 bit** by default
+ - To deploy a **32 bit** image, tap **Properties** and change the **Source Path** URL from `/raspbian.tgz` to `/raspbian32.tgz`
+ - To install **PIXEL Desktop**, run `pideploy-gui-install`.  Next time you login via RDP you will have a full desktop session with audio support.
+ - To install **Nextcloud 27**, run `pideploy-nextcloud-install` to launch the Nextcloudpi installer patched for Android.  Consult the official NextCloud documentation for administration of this powerful collaboration tool.
 
 ### Requirements:
 
 - Android device that has been rooted
 
-### Note to users of previous builds:
-
-- Uninstall any previous versions of Linux Deploy or Pi Deploy and reboot your device.
-- Failure to heed this advice will cause issues!
+### Note to users running previous version:
+- The APK installer is unchanged (no need to re-install the Pi Deploy APK)
+- If required, use Pi-hole Teleporter to back-up your existing configuration.
+- Login to your existing deployment and run `sudo unchroot uname -m`.  If your device returns `armv7`or `armv8` your device is 32 bit and you need to change the **Source Path** URL to `/raspbian32.tgz` 
 
 ### Installation:
 
@@ -75,3 +80,5 @@ Adjust QT display scaling: ```~/startwm.sh```
 Change the font size in QTerminal: ```~/.config/qterminal.org/qterminal.ini```
 
 **If your Android device has a battery and was unused for months or years, replace its battery.**  Old, worn, or abused Li-ion batteries can fail when pushed back into service.  Failure appears as a bulge in the battery, or worse a [**_thermal event_**](https://www.urbandictionary.com/define.php?term=unexpected+thermal+event).  A good battery provides [UPS](https://en.wikipedia.org/wiki/Uninterruptible_power_supply) protection for your newly-provisioned Pi-hole.
+
+**Note:** There is no endorsement or partnership between this page and [Pi-hole© LLC](https://pi-hole.net/). They deserve [your support](https://pi-hole.net/donate/) if you find this useful.

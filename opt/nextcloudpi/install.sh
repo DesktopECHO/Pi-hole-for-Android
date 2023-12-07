@@ -91,14 +91,18 @@ if [ -e /usr/sbin/unchroot ]; then
         update-rc.d -f ncp-metrics-exporter defaults
         update-rc.d -f nextcloud-domain defaults
         update-rc.d -f notify_push defaults
-	update-rc.d bootlogs      remove
-	update-rc.d smartmontools remove
-	update-rc.d rmnologin     remove
-	update-rc.d ipmievd       remove
-	service notify_push start
+    update-rc.d bootlogs      remove
+    update-rc.d smartmontools remove
+    update-rc.d rmnologin     remove
+    update-rc.d ipmievd       remove
+    service notify_push start
 fi
 
 bash /usr/local/bin/ncp-provisioning.sh
+
+# Set country code
+CountryCode=$(curl -s ipinfo.io/ | jq -r .country) ; sed -i "s/$CONFIG = array (/&\n\ \ 'default_phone_region' => '$CountryCode',/" /var/www//nextcloud/config/config.php
+echo Default calling region set to: $CountryCode
 
 cd -
 rm -rf "${TEMPDIR}"

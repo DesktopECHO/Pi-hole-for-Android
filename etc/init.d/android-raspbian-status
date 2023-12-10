@@ -17,12 +17,12 @@ IP=$(avahi-resolve -4 -n pihole.local | cut -f 2) ; (&>/dev/null avahi-publish -
 IP=$(avahi-resolve -4 -n pihole.local | cut -f 2) ; (&>/dev/null avahi-publish -a -R nextcloudpi.local $IP &)
 DIST=$(cat /etc/*-release | egrep "PRETTY_NAME" | cut -d = -f 2 | tr -d '"')
 ARCH=$(dpkg --print-architecture)
-[[ "$ARCH" = "aarch64" ]] && ARCH="ARM64" || ARCH="ARM32"
+[[ "$ARCH" = "arm64" ]] && ARCH="ARM64" || ARCH="ARM32"
 printf "\n$DIST $ARCH on $(hostname)\n" > /etc/motd
 cat /etc/motd
 echo '_______________________________________________'
 echo '                                               '
-   pihole -v
+   [[ -f /usr/bin/pihole-FTL ]] && pihole -v
    if [ -f /var/tmp/p4a ] ; then
       P4A=`cat /var/tmp/p4a`
       rm /var/tmp/p4a
@@ -34,7 +34,7 @@ echo '                                               '
       P4A="NOPE"
     else
      echo " "
-     pihole status
+     [[ -f /usr/bin/pihole-FTL ]] && pihole status
   fi
 echo '_______________________________________________'
 echo

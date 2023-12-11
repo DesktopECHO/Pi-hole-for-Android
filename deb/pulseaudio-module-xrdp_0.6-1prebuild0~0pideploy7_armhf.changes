@@ -1,0 +1,34 @@
+Format: 1.8
+Date: Thu, 02 Nov 2023 16:39:59 +0100
+Source: pulseaudio-module-xrdp
+Binary: pulseaudio-module-xrdp pulseaudio-module-xrdp-dbgsym
+Architecture: source armhf
+Version: 0.6-1prebuild0~0pideploy7
+Distribution: bookworm
+Urgency: medium
+Maintainer: noone@nowhere
+Changed-By: Michael Saxl <saxl@brennercom.net>
+Description:
+ pulseaudio-module-xrdp - pulseaudio module for xrdp
+Changes:
+ pulseaudio-module-xrdp (0.6-1prebuild0~0pideploy7) bookworm; urgency=medium
+ .
+   * make module appear as sound card instead of abstract
+Checksums-Sha1:
+ 3cebe916ce1e38a92cfba8fc3e09dfd0b20372b0 1715 pulseaudio-module-xrdp_0.6-1prebuild0~0pideploy7.dsc
+ 19030c1c92cf8fe1879462e6941878b46f03879e 76352 pulseaudio-module-xrdp_0.6-1prebuild0~0pideploy7.debian.tar.xz
+ 5f574b3fb31f312ad443269659d714fd5c7556b1 42176 pulseaudio-module-xrdp-dbgsym_0.6-1prebuild0~0pideploy7_armhf.deb
+ b6673413838046003364245c4e28d1d3f769b738 18872 pulseaudio-module-xrdp_0.6-1prebuild0~0pideploy7_armhf.buildinfo
+ d00432e8a153cd401d919aaf537eee65a16107f5 13324 pulseaudio-module-xrdp_0.6-1prebuild0~0pideploy7_armhf.deb
+Checksums-Sha256:
+ d845eab560fd80004f76a2f4ffb4fa9e7231fc9b18b35f308209e354fdadb296 1715 pulseaudio-module-xrdp_0.6-1prebuild0~0pideploy7.dsc
+ 75f76ad12b752a63090fd0280726414a71fe4a530ee5149580d192cb92ebd049 76352 pulseaudio-module-xrdp_0.6-1prebuild0~0pideploy7.debian.tar.xz
+ 42a0ee786abe13355a3f650601d068082b99778b4aaaebad491ffa0a91c204ea 42176 pulseaudio-module-xrdp-dbgsym_0.6-1prebuild0~0pideploy7_armhf.deb
+ aa05984ee72c26574b7b90d740d7f12e59c51e20473089d717e03a4115267855 18872 pulseaudio-module-xrdp_0.6-1prebuild0~0pideploy7_armhf.buildinfo
+ ec90252d579f768a1c55c39d22f96a9be7866988777d20c591ed676ff07284f9 13324 pulseaudio-module-xrdp_0.6-1prebuild0~0pideploy7_armhf.deb
+Files:
+ ff64587d583c49e00ef6ba09b83f0310 1715 net optional pulseaudio-module-xrdp_0.6-1prebuild0~0pideploy7.dsc
+ b5e36abb3be91fe5bbf58a862c26745d 76352 net optional pulseaudio-module-xrdp_0.6-1prebuild0~0pideploy7.debian.tar.xz
+ caefc7a54e71738222d568ff7211ee50 42176 debug optional pulseaudio-module-xrdp-dbgsym_0.6-1prebuild0~0pideploy7_armhf.deb
+ 5cb8b66187a5ff0120301217767900fe 18872 net optional pulseaudio-module-xrdp_0.6-1prebuild0~0pideploy7_armhf.buildinfo
+ 0adbfa921d556ea8fd7d10fcd8626b63 13324 net optional pulseaudio-module-xrdp_0.6-1prebuild0~0pideploy7_armhf.deb

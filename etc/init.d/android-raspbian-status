@@ -1,4 +1,3 @@
-#!/bin/bash
 ### BEGIN INIT INFO
 # Provides: android-raspbian-status
 # Required-Start: $all
@@ -12,17 +11,14 @@
 case "$1" in
 start)
 
+echo
+echo '_______________________________________________'
+neofetch --disable title --ascii_distro Raspbian | sed -r 's/\x1b\[[^@-~]*[@-~]//g'  > /tmp/neo
 yes ' ' | sed 60q
-IP=$(avahi-resolve -4 -n pihole.local | cut -f 2) ; (&>/dev/null avahi-publish -a -R $(hostname).local $IP &)
-IP=$(avahi-resolve -4 -n pihole.local | cut -f 2) ; (&>/dev/null avahi-publish -a -R nextcloudpi.local $IP &)
-DIST=$(cat /etc/*-release | egrep "PRETTY_NAME" | cut -d = -f 2 | tr -d '"')
-ARCH=$(dpkg --print-architecture)
-[[ "$ARCH" = "arm64" ]] && ARCH="ARM64" || ARCH="ARM32"
-printf "\n$DIST $ARCH on $(hostname)\n" > /etc/motd
-cat /etc/motd
+cat /tmp/neo | sed -e 's/^/  /' | grep -v Shell | grep -v Terminal | head -n -14 ; sleep 2
 echo '_______________________________________________'
 echo '                                               '
-   [[ -f /usr/bin/pihole-FTL ]] && pihole -v
+   [[ -f /usr/local/bin/pihole ]] && pihole -v
    if [ -f /var/tmp/p4a ] ; then
       P4A=`cat /var/tmp/p4a`
       rm /var/tmp/p4a
@@ -34,15 +30,17 @@ echo '                                               '
       P4A="NOPE"
     else
      echo " "
-     [[ -f /usr/bin/pihole-FTL ]] && pihole status
+     [[ -f /usr/local/bin/pihole ]] && pihole status
   fi
 echo '_______________________________________________'
 echo
+IP=$(avahi-resolve -4 -n pihole.local | cut -f 2) ; (&>/dev/null avahi-publish -a -R $(hostname).local $IP &)
+IP=$(avahi-resolve -4 -n pihole.local | cut -f 2) ; (&>/dev/null avahi-publish -a -R nextcloudpi.local $IP &)
 ;;
 
 stop)
 
-yes ' ' | sed 50q
+yes ' ' | sed 60q
 echo '_______________________________________________'
 echo '                                               '
 echo '     *** Container SHUTDOWN Initiated! ***     '

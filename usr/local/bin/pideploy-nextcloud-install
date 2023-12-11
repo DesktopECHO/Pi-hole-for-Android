@@ -23,7 +23,7 @@ sudo systemctl start mariadb
 
 # Install patched libapr1 if kernel is older than 3.19
 KERNEL=$(uname -r | sed -r 's/([0-9]+)/0000\1/g; s/0*([0-9]{4})/\1/g')
-if [[ "$KERNEL" < "0003.0019" ]]; then dpkg -i /deb/Legacy/libapr1_1.7.2-3_$(dpkg --print-architecture).deb ; apt-mark hold libapr1 ; fi
+if [[ "$KERNEL" < "0003.0019" ]]; then sudo dpkg -i /deb/Legacy/libapr1_1.7.2-3_$(dpkg --print-architecture).deb ; sudo apt-mark hold libapr1 ; fi
 
 # Install systemd as a placeholder and replace systemctl with version for containers
 sudo apt-get -qy install systemd --no-install-recommends

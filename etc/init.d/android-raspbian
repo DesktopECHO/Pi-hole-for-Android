@@ -42,7 +42,7 @@ start)
         echo "IP/Subnet: $ipaddr/$subnetmask"
         echo "Interface: $device"
         echo "_______________________________________________"
-        yes ' ' | sed 4q
+        echo " "
         export DEBIAN_FRONTEND=noninteractive
         if [ ! -f /sbin/unbound ]; then
                 echo "_______________________________________________" ; echo ' '
@@ -62,7 +62,7 @@ start)
                 update-rc.d ssh disable >>/tmp/p4a.log 2>&1
                 pkill dropbear >>/tmp/p4a.log 2>&1
                 echo "Installing Unbound..."
-                dpkg -i /deb/unbound_*.deb >>/tmp/p4a.log 2>&1
+                dpkg -i /deb/unbound*_$(dpkg --print-architecture).deb >>/tmp/p4a.log 2>&1
                 cp /.pihole.conf /etc/unbound/unbound.conf.d/pihole.conf
                 /etc/init.d/unbound restart >>/tmp/p4a.log 2>&1
                 echo "Installing Pi-hole..."
@@ -86,7 +86,7 @@ start)
         curl --silent --output /bin/padd https://raw.githubusercontent.com/pi-hole/PADD/master/padd.sh &
 
         # Setup environment and ensure users are in right groups
-        rm -f /usr/sbin/runlevel ; echo 'echo N 3' > /sbin/runlevel ; chmod +x /sbin/runlevel
+        rm -f /usr/sbin/runlevel ; echo 'echo N 3' > /usr/sbin/runlevel ; chmod +x /usr/sbin/runlevel
         dpkg-divert --local --rename --add /sbin/initctl &>> /tmp/p4a.tmp
         ln -fs /bin/true /sbin/initctl
 
@@ -96,7 +96,7 @@ start)
         chmod +x /usr/bin/deb-systemd-helper
 
         # Clean-up environment before startup
-        rm -rf /usr/bin/systemctl /bin/reboot /bin/poweroff /usr/sbin/service /var/lock/subsys/* /tmp/* /var/run/* /sbin/poweroff /sbin/reboot
+        rm -rf /usr/bin/systemctl /bin/reboot /bin/poweroff /usr/sbin/service /var/lock/subsys/* /var/run/dbus/* /tmp/* /sbin/poweroff /sbin/reboot
         /bin/cp /.service    /usr/sbin/service
         /bin/cp /.poweroff   /sbin/poweroff
         /bin/cp /.reboot     /sbin/reboot
@@ -104,6 +104,9 @@ start)
         /bin/cp /.xrdp.ini   /etc/xrdp/xrdp.ini
         /bin/cp /.logo.bmp   /etc/xrdp/logo.bmp
         /bin/cp /.mariadb    /etc/init.d/mariadb
+        /bin/cp /.unbound    /etc/init.d/unbound
+        /bin/cp /.pihole-FTL /etc/init.d/pihole-FTL
+        /bin/cp /.udev       /etc/init.d/udev
         #  By default, when an instance is started Pi-hole networking
         #  is automagically configured.  When you change netwokrks on the
         #  Android device, stop the Linux Deploy instance and re-start it.
@@ -111,8 +114,8 @@ start)
         #  Alternatively, set static assignment by commentng-out
         #  the next 2 lines.  Manually add your IP, subnet
         #  and interface name to /etc/pihole/setupVars.conf
-        sed -i "/IPV4_ADDRESS/c\IPV4_ADDRESS=$ipaddr/$subnetmask" /etc/pihole/setupVars.conf
-        sed -i "/PIHOLE_INTERFACE/c\PIHOLE_INTERFACE=$device"     /etc/pihole/setupVars.conf
+        sed -i "/IPV4_ADDRESS/c\IPV4_ADDRESS=$ipaddr/$subnetmask" /etc/pihole/setupVars.conf >>/tmp/p4a.log 2>&1
+        sed -i "/PIHOLE_INTERFACE/c\PIHOLE_INTERFACE=$device"     /etc/pihole/setupVars.conf >>/tmp/p4a.log 2>&1
 ;;
 
 stop)

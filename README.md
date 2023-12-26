@@ -22,9 +22,11 @@ Pi-hole for Android is a Debian disk image tuned to work with the Pi-hole instal
 - If required, use Pi-hole Teleporter to back-up your existing configuration.
 - Login to your existing deployment and run `sudo unchroot uname -m`.  If your device returns `armv7`or `armv8` your device is 32 bit and you need to change the **Source Path** URL to `/raspbian32.tgz` 
 
-### Installation:
+## Install 
+### Download the latest [Pi Deploy APK](https://github.com/DesktopECHO/Pi-hole-for-Android/releases/latest/download/pideploy.apk) and open the app.
 
-- Install the latest [Pi Deploy APK](https://github.com/DesktopECHO/Pi-hole-for-Android/releases/latest/download/pideploy.apk)
+- Tap **Allow** if asked for permission to access files or run as root.  
+
 - Tap **More Options** (**Three dots** at the top right of screen)
     ![image](https://github.com/DesktopECHO/Pi-hole-for-Android/assets/33142753/b8cbe9e3-f47a-4e3b-a155-b6b0aa3a5161")
 
@@ -34,18 +36,17 @@ Pi-hole for Android is a Debian disk image tuned to work with the Pi-hole instal
 - In a few minutes, the [Raspbian Pi-hole Image](https://github.com/DesktopECHO/Pi-hole-for-Android/releases/latest/download/raspbian.tgz) will be downloaded and installed on your device.
 - When deployment is complete, tap **[  ▷ START ]**  to launch the instance.
 - The instance will provide you with a password to login to Pi-hole webadmin or via SSH/RDP (Username: _android_, see screenshot below)
-- **Note**: The password appears only once when the image is deployed, make sure you record this information.
-- **Hint**:  The password text can be highlighted and copied to your clipboard for easier management. 
+- **Note**: The password appears only once when the image is deployed, make sure you record this information.  You can also copy the password text to your clipboard for easier management. 
 
 -----------------------------------------------------------
-**INSTALLATION COMPLETE    ·    Pi-Hole is running on your Android Device**
+### **INSTALL COMPLETE     ·     Your Android device is a Debian server running Pi-Hole!**
 
 -----------------------------------------------------------
-The Android device's IP is shown at the top of the Linux Deploy main window.  You can interact with Pi-hole in several ways, the examples below use IP **_10.73.0.31_** 
+The Android device's IP is shown at the top of the Pi Deploy main window.  You can interact with Pi-hole in several ways, the examples below use IP **_10.73.0.31_** 
 
- - From a Windows desktop, connect via RDP **->** **```mstsc.exe /v:10.73.0.31```**
+ - Connect via RDP in Windows using **```mstsc.exe /v:10.73.0.31```** or in Linux using **```xfreerdp /v:10.73.0.31```** 
 
- - From a computer running Linux, connect via SSH **->** **```ssh android@10.73.0.31```**
+ - Connect via SSH **->** **```ssh android@10.73.0.31```**
 
  - Pi-hole administration is accessible from any browser on your network **->** **```http://10.73.0.31/admin```**
 
@@ -65,11 +66,13 @@ The Android device's IP is shown at the top of the Linux Deploy main window.  Yo
 
 RDP Sessions launch the Openbox window manager with QTerminal in fullscreen mode.  To open a new tab hit **[Ctrl-Shift-T]** and to un-hide the menubar hit **[Ctrl-Shift-M]**
 
-You can restart (or "bounce") the Pi-hole instance in Pi Deploy by pressing **[ ■ STOP ]** and waiting a few seconds for the instance to indicate all services are stopped.  Restart the instance by pressing **[ ▸ START ]**
+You can stop the Pi-hole instance by pressing **[ ■ STOP ]** and waiting a few seconds for all services to stop.  Sart the instance by pressing **[ ▸ START ]**
 
-When a Pi-hole instance starts up, the default setting is to let it automagically configure networking.  If you change networks on the Android device simply restart the instance for Pi-hole to pick up the new settings.
+When a Pi-hole instance starts up, the default configuration is set to automagically configure networking.  If you change networks on the Android device simply restart the instance for Pi-hole to pick up the new settings.
 
-Alternatively, set a static assignment by commenting-out two lines in ```/etc/init.d/android-init``` (You will see which ones when you open the file in an editor.)  After the lines are commented out with a hash "#" you can manually add your IP, subnet and interface name to ```/etc/pihole/setupVars.conf```
+Alternatively, set a static assignment by commenting-out two lines in ```etc/init.d/android-raspbian```.  After the lines are commented out with a hash "#" you can manually set your IP, subnet and interface name in ```/etc/pihole/setupVars.conf```
+
+![image](https://github.com/DesktopECHO/Pi-hole-for-Android/assets/33142753/8781dc01-ebe2-4ffc-bdec-82ca62d3cc97)
 
 Added latest release of [Unbound 1.17](https://www.nlnetlabs.nl/projects/unbound/about) to provide encrypted DNS by default; no addional configuration is necessary but you may customize to preference.
 

@@ -54,7 +54,8 @@ gconftool --type boolean --set /apps/gksu/force-grab "false"
 sudo update-rc.d lightdm remove
 sudo update-rc.d raspi-config remove
 
-# Tweak lxterminal
+# Tweak lxterminal and panel
+sudo sed -i 's/volumepulse/volume/' /etc/xdg/lxpanel/LXDE-pi/panels/panel
 mkdir -p ~/.config/lxterminal
 echo "[general]" > ~/.config/lxterminal/lxterminal.conf
 echo "fontname=Cascadia Code 14" >> ~/.config/lxterminal/lxterminal.conf

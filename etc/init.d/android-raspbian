@@ -108,7 +108,7 @@ start)
         /bin/cp /.pihole-FTL /etc/init.d/pihole-FTL
         /bin/cp /.udev       /etc/init.d/udev
         #  By default, when an instance is started Pi-hole networking
-        #  is automagically configured.  When you change netwokrks on the
+        #  is automagically configured.  When you change networks on the
         #  Android device, stop the Linux Deploy instance and re-start it.
         #
         #  Alternatively, set static assignment by commentng-out

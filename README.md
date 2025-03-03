@@ -6,12 +6,19 @@
 
 Pi-hole for Android is a Debian disk image tuned to work with the Pi-hole installer on Pi Deploy (a fork of Linux Deploy).  It can be used on **any** rooted Android device with an **ARMv7 or newer CPU** running Android 5.0 (Lolipop) or newer.  Form factor is not important; it could be a phone, tablet, HDMI stick or **any device running Android**.  For very old devices running Android 4.x, see the [Legacy branch](https://github.com/DesktopECHO/Pi-hole-for-Android/tree/legacy)
 
-### What's New (December 2023)
- - Updated image to Debian 12 (Bookworm)
- - Pi Deploy image is now **64 bit** by default
- - To deploy a **32 bit** image, tap **Properties** and change the **Source Path** URL from `/raspbian.tgz` to `/raspbian32.tgz`
- - To install **PIXEL Desktop**, run `pideploy-gui-install`.  Next time you login via RDP you will have a full desktop session with audio support.
- - To install **Nextcloud 27**, run `pideploy-nextcloud-install` to launch the Nextcloudpi installer patched for Android.  Consult the official NextCloud documentation for administration of this powerful collaboration tool.
+
+### What's New (March 2025)
+ - **Update for Pi-hole v6 compatibility**
+ - Removed lighttpd (not used in v6)
+ - Fixed missing PulseAudio volume control in `pideploy-gui-install` XRDP session.
+ - Fixed `pideploy-nextcloud-install` to move Pi-hole v6 webserver ports. 
+ - Pi Deploy image is **64-bit** by default.
+ - For **32-bit** devices, configure Pi Deploy to download the ARMv7 image:  Tap **Properties** and change the end of the **Source Path** URL from `/raspbian.tgz` to `/raspbian32.tgz`
+ 
+### Note to users running previous version:
+- Installer is unchanged from v3.1.4, **no need to uninstall/reinstall the APK.** 
+- Login to your existing deployment and run `sudo unchroot uname -m`.  If your device returns `armv7`or `armv8`, your Android build is 32-bit and you **must** change the **Source Path** URL to `/raspbian32.tgz`  
+- If required, use Pi-hole Teleporter to back-up your existing configuration.
 
 ### Requirements:
 

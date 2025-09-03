@@ -63,7 +63,7 @@ start)
                 pkill dropbear >>/tmp/p4a.log 2>&1
                 echo "Installing Unbound..."
                 dpkg -i /deb/unbound*_$(dpkg --print-architecture).deb >>/tmp/p4a.log 2>&1
-                cp /.pihole.conf /etc/unbound/unbound.conf.d/pihole.conf
+                cp /.pi-hole.conf /etc/unbound/unbound.conf.d/pi-hole.conf
                 /etc/init.d/unbound restart >>/tmp/p4a.log 2>&1
                 echo "Installing Pi-hole..."
                 wget -q -O basic-install.sh https://install.pi-hole.net

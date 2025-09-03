@@ -38,7 +38,7 @@ echo "127.0.0.1  localhost"                  >  /etc/hosts
 echo "::1        ip6-localhost ip6-loopback" >> /etc/hosts
 cd /root         ; rm -rf .cache .pcsc* .ssh .vnc .rnd .pki .local .Xauthority .xsession* *.sh
 cd /home/android ; rm -rf .cache .pcsc* .ssh .vnc .rnd .pki .local .Xauthority .xsession* PADD.pid piHoleVersion thinclient_drives /tmp/* /tmp/.*
-rm -rf /etc/unbound/*.key /etc/unbound/*.pem /etc/unbound/unbound.conf.d/pihole.conf
+rm -rf /etc/unbound/*.key /etc/unbound/*.pem /etc/unbound/unbound.conf.d/pi-hole.conf
 echo
 read -p "Turn off this instance and run image backup or hit [Enter] to exit"
 exit
